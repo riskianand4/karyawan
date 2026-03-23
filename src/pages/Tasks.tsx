@@ -38,6 +38,7 @@ const PRIORITY_LABELS: Record<string, string> = { high: "Tinggi", medium: "Sedan
 const Tasks = () => {
   const { employeeId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, isAdmin, users } = useAuth();
   const { tasks, updateTaskStatus, refreshTasks, loading: tasksLoading } = useTasks();
   const adminBadges = useAdminBadges();
@@ -48,10 +49,16 @@ const Tasks = () => {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [pendingDrop, setPendingDrop] = useState<{ taskId: string; status: TaskStatus } | null>(null);
-  const [taskTab, setTaskTab] = useState<"personal" | "team">("personal");
+  const [taskTab, setTaskTab] = useState<"personal" | "team">(
+    searchParams.get("tab") === "team" ? "team" : "personal"
+  );
   const [teams, setTeams] = useState<TeamGroup[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const [adminTab, setAdminTab] = useState<"employee" | "team">("employee");
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(
+    searchParams.get("teamId") || null
+  );
+  const [adminTab, setAdminTab] = useState<"employee" | "team">(
+    searchParams.get("tab") === "team" ? "team" : "employee"
+  );
   const [completionDrop, setCompletionDrop] = useState<{ taskId: string } | null>(null);
   const [completionFiles, setCompletionFiles] = useState<File[]>([]);
   const [completingTask, setCompletingTask] = useState(false);

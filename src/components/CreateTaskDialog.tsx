@@ -30,7 +30,7 @@ const CreateTaskDialog = ({ teams = [], isLeader = false }: CreateTaskDialogProp
   const [priority, setPriority] = useState<Priority>("medium");
   const [deadline, setDeadline] = useState("");
   const [attachments, setAttachments] = useState<TaskAttachment[]>([]);
-  const [taskType, setTaskType] = useState<"personal" | "team">("personal");
+  const [taskType, setTaskType] = useState<"personal" | "team">(isLeader && !isAdmin ? "team" : "personal");
   const [selectedTeamId, setSelectedTeamId] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
