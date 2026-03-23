@@ -19,6 +19,7 @@ import { CardGridSkeleton } from "@/components/PageSkeleton";
 
 const MyTeam = () => {
   const { user, users: allUsers } = useAuth();
+  const navigate = useNavigate();
   const { tasks } = useTasks();
   const [teamGroups, setTeamGroups] = useState<TeamGroup[]>([]);
   const [loading, setLoading] = useState(true);
