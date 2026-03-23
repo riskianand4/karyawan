@@ -51,6 +51,41 @@ exports.getById = async (id) => {
 };
 
 exports.create = async (data, requestUser) => {
+  const role = requestUser?.role;
+  const userId = requestUser?.id;
+
+  // Permission check: only admin and leader can create tasks
+  if (role !== "admin") {
+    // Check if user is a leader
+    const leaderTeams = await TeamGroup.find({ leaderId: userId });
+    if (leaderTeams.length === 0) {
+      throw Object.assign(new Error("Hanya admin dan ketua tim yang bisa membuat tugas"), { statusCode: 403 });
+    }
+    // Leader can only create team tasks
+    if (data.type !== "team") {
+      throw Object.assign(new Error("Ketua tim hanya bisa membuat tugas tim"), { statusCode: 403 });
+    }
+    // Leader can only create tasks for teams they lead
+    const leaderTeamIds = leaderTeams.map((t) => t._id.toString());
+    if (!data.teamId || !leaderTeamIds.includes(data.teamId)) {
+      throw Object.assign(new Error("Anda hanya bisa membuat tugas untuk tim yang Anda pimpin"), { statusCode: 403 });
+    }
+  }
+
+  // Validate payload
+  if (data.type === "personal" && !data.assigneeId) {
+    throw Object.assign(new Error("Tugas pribadi harus memiliki assigneeId"), { statusCode: 400 });
+  }
+  if (data.type === "team" && !data.teamId) {
+    throw Object.assign(new Error("Tugas tim harus memiliki teamId"), { statusCode: 400 });
+  }
+  if (data.type === "team" && data.teamId) {
+    const team = await TeamGroup.findById(data.teamId);
+    if (!team) {
+      throw Object.assign(new Error("Tim tidak ditemukan"), { statusCode: 404 });
+    }
+  }
+
   const task = await Task.create(data);
   const creatorName = requestUser?.name || "Seseorang";
 

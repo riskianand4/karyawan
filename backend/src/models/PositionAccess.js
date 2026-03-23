@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const positionAccessSchema = new mongoose.Schema({
   position: { type: String, required: true, unique: true, trim: true },
+  description: { type: String, default: "", trim: true },
   menus: {
     attendance: { type: Boolean, default: false },
     finance: { type: Boolean, default: false },
