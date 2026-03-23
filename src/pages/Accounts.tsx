@@ -98,14 +98,16 @@ const Accounts = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [docs, teamsData, tasksData] = await Promise.all([
+      const [docs, teamsData, tasksData, posData] = await Promise.all([
         api.getAllDocuments(),
         api.getTeams(),
         api.getTasks(),
+        api.getPositions().catch(() => []),
       ]);
       setDocuments(docs);
       setTeams(teamsData);
       setTasks(tasksData);
+      setPositions(posData);
     } catch (err) {
       console.error("Failed to load accounts data:", err);
     } finally {
