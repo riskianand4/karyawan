@@ -21,6 +21,8 @@ import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import EmployeeGrid, { EmployeeHeader } from "@/components/EmployeeGrid";
 
+import defaultFavicon from "@/assets/iconDefault.ico";
+
 const LinkFavicon = ({ url, className = "" }: { url: string; className?: string }) => {
   const [failed, setFailed] = useState(false);
   const domain = useMemo(() => {
@@ -28,7 +30,14 @@ const LinkFavicon = ({ url, className = "" }: { url: string; className?: string 
   }, [url]);
 
   if (failed || !domain) {
-    return <LinkIcon className={className || "w-4 h-4 text-accent-foreground"} />;
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <img src={defaultFavicon} alt="default icon" className="w-9 h-9 rounded cursor-help" />
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs max-w-xs break-all">{url}</TooltipContent>
+      </Tooltip>
+    );
   }
 
   return (

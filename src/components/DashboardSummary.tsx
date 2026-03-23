@@ -46,7 +46,7 @@ const DashboardSummary = () => {
     }
   } else {
     // Employee: personal task alerts
-    const myTasks = tasks.filter((t) => t.assigneeId === user?.id);
+    const myTasks = tasks;
     const overdue = myTasks.filter((t) => isPast(new Date(t.deadline)) && t.status !== "completed");
     const dueToday = myTasks.filter((t) => isToday(new Date(t.deadline)) && t.status !== "completed");
     const recentlyCompleted = myTasks.filter((t) => t.status === "completed").slice(0, 3);
