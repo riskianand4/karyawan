@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTasks } from "@/contexts/TaskContext";
 import api from "@/lib/api";
 import type { TeamGroup, User } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
