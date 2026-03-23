@@ -323,8 +323,25 @@ const SettingsPage = () => {
     </div>
   );
 
-  // Get unique positions from users
-  const uniquePositions: string[] = [...new Set(allUsers.filter((u) => u.role === "employee" && u.position).map((u) => u.position))] as string[];
+  const uniquePositions: string[] = dynamicPositions.map((p) => p.position);
+
+  const handleAddPosition = async () => {
+    if (!newPositionName.trim()) {
+      toast.error("Nama jabatan wajib diisi");
+      return;
+    }
+    try {
+      const result = await api.createPosition(newPositionName.trim(), newPositionDesc.trim());
+      setDynamicPositions((prev) => [...prev, result]);
+      setPositionAccess((prev) => ({ ...prev, [result.position]: result.menus }));
+      setNewPositionName("");
+      setNewPositionDesc("");
+      setDialogJabatan(false);
+      toast.success("Jabatan berhasil ditambahkan");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menambah jabatan");
+    }
+  };
 
   const handlePositionMenuToggle = async (position: string, menuKey: string, checked: boolean) => {
     const current = positionAccess[position] || {};
