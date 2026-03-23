@@ -1,0 +1,17 @@
+const mongoose = require("mongoose");
+
+const positionAccessSchema = new mongoose.Schema({
+  position: { type: String, required: true, unique: true, trim: true },
+  menus: {
+    attendance: { type: Boolean, default: false },
+    finance: { type: Boolean, default: false },
+    payslip: { type: Boolean, default: false },
+    vault: { type: Boolean, default: false },
+    messages: { type: Boolean, default: false },
+    team: { type: Boolean, default: false },
+    notes: { type: Boolean, default: false },
+    reports: { type: Boolean, default: false },
+  },
+}, { timestamps: true });
+
+module.exports = mongoose.model("PositionAccess", positionAccessSchema);

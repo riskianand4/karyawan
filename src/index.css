@@ -1,104 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Warm, sophisticated palette inspired by the design */
-    --background: 36 44% 96%;
-    --foreground: 0 0% 18%;
+    --background: 0 0% 100%;
+    --foreground: 220 14% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 14% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 14% 10%;
+    --primary: 160 100% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 14% 20%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 46%;
+    --accent: 160 60% 96%;
+    --accent-foreground: 160 84% 30%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 160 100% 28%;
+    --radius: 0.5rem;
 
-    --card: 33 40% 94%;
-    --card-foreground: 0 0% 18%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 8% 40%;
+    --sidebar-primary: 160 100% 28%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 160 60% 96%;
+    --sidebar-accent-foreground: 160 84% 30%;
+    --sidebar-border: 220 13% 93%;
+    --sidebar-ring: 160 100% 28%;
 
-    --popover: 36 44% 96%;
-    --popover-foreground: 0 0% 18%;
-
-    --primary: 0 0% 18%;
-    --primary-foreground: 36 44% 96%;
-
-    --secondary: 25 30% 70%;
-    --secondary-foreground: 0 0% 18%;
-
-    --muted: 33 30% 88%;
-    --muted-foreground: 0 0% 40%;
-
-    --accent: 140 20% 50%;
-    --accent-foreground: 36 44% 96%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 36 44% 96%;
-
-    --border: 33 25% 85%;
-    --input: 33 25% 85%;
-    --ring: 0 0% 18%;
-
-    --radius: 1rem;
-
-    /* Custom design tokens */
-    --tag-financing: 210 50% 75%;
-    --tag-lifestyle: 140 20% 70%;
-    --tag-community: 25 35% 60%;
-    --tag-wellness: 280 30% 75%;
-    --tag-travel: 195 50% 70%;
-    --tag-creativity: 330 40% 75%;
-    --tag-growth: 50 45% 70%;
-
-    /* Polish design tokens */
-    --cream: 40 40% 90%;
-    --cream-foreground: 0 0% 18%;
-    --surface-elevated: 36 44% 98%;
-    --shadow-soft: 0 0% 0%;
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
   }
 
   .dark {
-    --background: 0 0% 10%;
-    --foreground: 36 44% 96%;
+    /* #161917 → ~140° 6% 9% */
+    --background: 140 6% 9%;
+    /* #ABABAB → 0° 0% 67% */
+    --foreground: 0 0% 67%;
+    /* #202422 → 140 5% 13% */
+    --card: 140 5% 13%;
+    --card-foreground: 0 0% 67%;
+    --popover: 140 5% 13%;
+    --popover-foreground: 0 0% 67%;
+    /* #262D27 → 129 6% 16% (button/primary) */
+    --primary: 129 6% 16%;
+    --primary-foreground: 0 0% 67%;
+    /* #202422 */
+    --secondary: 140 5% 13%;
+    --secondary-foreground: 0 0% 60%;
+    /* #3E4540 → 144 5% 26% */
+    --muted: 144 5% 26%;
+    --muted-foreground: 0 0% 50%;
+    /* #262D27 */
+    --accent: 129 6% 16%;
+    --accent-foreground: 0 0% 67%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    /* border/input from #202422 slightly lighter */
+    --border: 140 5% 16%;
+    --input: 140 5% 14%;
+    --ring: 129 6% 24%;
 
-    --card: 0 0% 14%;
-    --card-foreground: 36 44% 96%;
+    /* Sidebar */
+    --sidebar-background: 140 6% 8%;
+    --sidebar-foreground: 0 0% 55%;
+    --sidebar-primary: 129 6% 16%;
+    --sidebar-primary-foreground: 0 0% 67%;
+    --sidebar-accent: 129 6% 14%;
+    --sidebar-accent-foreground: 0 0% 60%;
+    --sidebar-border: 140 5% 14%;
+    --sidebar-ring: 129 6% 24%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 36 44% 96%;
-
-    --primary: 36 44% 96%;
-    --primary-foreground: 0 0% 18%;
-
-    --secondary: 25 15% 30%;
-    --secondary-foreground: 36 44% 96%;
-
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 60%;
-
-    --accent: 140 20% 45%;
-    --accent-foreground: 36 44% 96%;
-
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 36 44% 96%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 36 44% 96%;
-
-    /* Dark mode tag colors */
-    --tag-financing: 210 40% 45%;
-    --tag-lifestyle: 140 20% 40%;
-    --tag-community: 25 30% 40%;
-    --tag-wellness: 280 25% 45%;
-    --tag-travel: 195 40% 45%;
-    --tag-creativity: 330 35% 45%;
-    --tag-growth: 50 40% 45%;
-
-    /* Dark mode polish tokens */
-    --cream: 40 20% 25%;
-    --cream-foreground: 36 44% 96%;
-    --surface-elevated: 0 0% 16%;
-    --shadow-soft: 0 0% 0%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
   }
 }
 
@@ -106,160 +92,89 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   html {
     scroll-behavior: smooth;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif tracking-tight;
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.3);
+  }
+}
+
+@layer components {
+  .ms-card {
+    @apply bg-card border border-border/60 rounded-xl shadow-[0_1px_3px_0_rgb(0_0_0/0.04)];
+  }
+  .ms-card-hover {
+    @apply bg-card border border-border/60 rounded-xl shadow-[0_1px_3px_0_rgb(0_0_0/0.04)] transition-all duration-200 hover:shadow-md hover:border-primary/20 hover:-translate-y-0.5;
   }
 }
 
 @layer utilities {
-  .card-hover {
-    @apply transition-all duration-500 hover:scale-[1.02];
-    box-shadow: 0 4px 20px -4px hsl(var(--shadow-soft) / 0.1);
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px;
   }
 
-  .card-hover:hover {
-    box-shadow: 0 20px 40px -10px hsl(var(--shadow-soft) / 0.15);
+  .print\:hidden,
+  header,
+  nav,
+  aside,
+  [data-sidebar],
+  .sidebar,
+  button:not(.print-visible) {
+    display: none !important;
   }
 
-  .pill-nav {
-    @apply rounded-full bg-[hsl(var(--surface-elevated))] backdrop-blur-lg border border-border/50;
+  .ms-card {
+    border: 1px solid #e5e7eb !important;
+    box-shadow: none !important;
+    break-inside: avoid;
   }
 
-  .floating-button {
-    @apply w-12 h-12 rounded-full bg-[hsl(var(--cream)/0.9)] backdrop-blur-sm flex items-center justify-center text-[hsl(var(--cream-foreground))] hover:bg-[hsl(var(--cream))] hover:scale-110 transition-all duration-300;
-    box-shadow: 0 4px 12px -2px hsl(var(--shadow-soft) / 0.15);
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Animation keyframes */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  @page {
+    margin: 1.5cm;
+    size: A4;
   }
+}
 
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
 
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.6s ease-out;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 0.6s ease-out;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.5s ease-out;
-  }
-
-  /* Stagger animations */
-  .stagger-1 {
-    animation-delay: 0.1s;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .stagger-2 {
-    animation-delay: 0.2s;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .stagger-3 {
-    animation-delay: 0.3s;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .stagger-4 {
-    animation-delay: 0.4s;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .stagger-5 {
-    animation-delay: 0.5s;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .stagger-6 {
-    animation-delay: 0.6s;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .tag-financing {
-    @apply bg-[hsl(var(--tag-financing))] text-primary;
-  }
-
-  .tag-lifestyle {
-    @apply bg-[hsl(var(--tag-lifestyle))] text-primary;
-  }
-
-  .tag-community {
-    @apply bg-[hsl(var(--tag-community))] text-primary;
-  }
-
-  .tag-wellness {
-    @apply bg-[hsl(var(--tag-wellness))] text-primary;
-  }
-
-  .tag-travel {
-    @apply bg-[hsl(var(--tag-travel))] text-primary;
-  }
-
-  .tag-creativity {
-    @apply bg-[hsl(var(--tag-creativity))] text-primary;
-  }
-
-  .tag-growth {
-    @apply bg-[hsl(var(--tag-growth))] text-primary;
-  }
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
