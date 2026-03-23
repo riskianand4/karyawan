@@ -363,7 +363,7 @@ const SettingsPage = () => {
       <div className="ms-card p-4 space-y-4">
         <div className="flex items-center justify-between gap-1.5 text-xs font-semibold text-foreground">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground"><KeyRound className="w-3.5 h-3.5 " /> Hak Akses Menu per Jabatan</span>
-          <Button onClick={HandleJabatan} className=" shadow-md ">Tambah Jabatan</Button>
+          <Button onClick={handleJabatanClick} className="shadow-md gap-1.5"><Plus className="w-3.5 h-3.5" /> Tambah Jabatan</Button>
         </div>
         <p className="text-xs text-muted-foreground">
           Atur menu mana saja yang bisa diakses oleh setiap jabatan. Menu global harus diaktifkan terlebih dahulu di tab Menu.
