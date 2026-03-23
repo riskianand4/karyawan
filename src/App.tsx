@@ -32,6 +32,7 @@ const Finance = lazy(() => import("./pages/Finance"));
 const Payslip = lazy(() => import("./pages/Payslip"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Accounts = lazy(() => import("./pages/Accounts"));
+const EmployeeProfileEditor = lazy(() => import("./pages/EmployeeProfileEditor"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
