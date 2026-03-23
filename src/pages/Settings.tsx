@@ -86,10 +86,13 @@ const SettingsPage = () => {
   useEffect(() => {
     if (isAdmin) {
       setPositionAccessLoading(true);
-      api.getPositionAccess()
-        .then((data) => setPositionAccess(data))
-        .catch(() => {})
-        .finally(() => setPositionAccessLoading(false));
+      Promise.all([
+        api.getPositionAccess(),
+        api.getPositions().catch(() => []),
+      ]).then(([accessData, posData]) => {
+        setPositionAccess(accessData);
+        setDynamicPositions(posData);
+      }).catch(() => {}).finally(() => setPositionAccessLoading(false));
     }
   }, [isAdmin]);
 
