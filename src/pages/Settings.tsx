@@ -5,7 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useMenuSettings } from "@/contexts/MenuSettingsContext";
 import api from "@/lib/api";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, User, Bell, Globe, Shield, Trash2, BarChart3, Moon, Sun, Menu, KeyRound, Briefcase } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Globe, Shield, Trash2, BarChart3, Moon, Sun, Menu, KeyRound, Briefcase, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
