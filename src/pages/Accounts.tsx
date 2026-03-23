@@ -50,6 +50,7 @@ const passwordSchema = z.string().min(6, "Password minimal 6 karakter").max(50);
 type ProfileFilter = "all" | "complete" | "incomplete";
 
 const Accounts = () => {
+  const navigate = useNavigate();
   const { users, refreshUsers } = useAuth();
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [teams, setTeams] = useState<TeamGroup[]>([]);
