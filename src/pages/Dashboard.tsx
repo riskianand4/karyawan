@@ -38,7 +38,7 @@ const Dashboard = () => {
     return "Selamat sore";
   };
 
-  const myTasks = isAdmin ? tasks : tasks.filter((t) => t.assigneeId === user?.id);
+  const myTasks = isAdmin ? tasks : tasks;
   const pending = myTasks.filter((t) => t.status === "todo").length;
   const inProgress = myTasks.filter((t) => t.status === "in-progress").length;
   const needsReview = myTasks.filter((t) => t.status === "needs-review").length;

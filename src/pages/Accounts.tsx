@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import type { User, UserDocument, Role, TeamGroup } from "@/types";
@@ -49,10 +50,12 @@ const passwordSchema = z.string().min(6, "Password minimal 6 karakter").max(50);
 type ProfileFilter = "all" | "complete" | "incomplete";
 
 const Accounts = () => {
+  const navigate = useNavigate();
   const { users, refreshUsers } = useAuth();
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [teams, setTeams] = useState<TeamGroup[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [positions, setPositions] = useState<{ id: string; position: string; description: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [profileFilter, setProfileFilter] = useState<ProfileFilter>("all");
@@ -95,14 +98,16 @@ const Accounts = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [docs, teamsData, tasksData] = await Promise.all([
+      const [docs, teamsData, tasksData, posData] = await Promise.all([
         api.getAllDocuments(),
         api.getTeams(),
         api.getTasks(),
+        api.getPositions().catch(() => []),
       ]);
       setDocuments(docs);
       setTeams(teamsData);
       setTasks(tasksData);
+      setPositions(posData);
     } catch (err) {
       console.error("Failed to load accounts data:", err);
     } finally {
@@ -310,7 +315,11 @@ const Accounts = () => {
                       <TableCell className="text-xs text-muted-foreground">{user.position}</TableCell>
                       <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{user.department}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+                          onClick={() => navigate(`/accounts/${user.id}/profile`)}
+                          title="Klik untuk melengkapi profil"
+                        >
                           <Progress value={completion} className={`w-16 h-1.5 ${getCompletionBgColor(completion)}`} />
                           <span className={`text-[10px] font-medium ${getCompletionColor(completion)}`}>{completion}%</span>
                         </div>
@@ -362,7 +371,20 @@ const Accounts = () => {
               {formErrors.password && <p className="text-[10px] text-destructive">{formErrors.password}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1"><Label className="text-xs">Jabatan</Label><Input value={formPosition} onChange={(e) => setFormPosition(e.target.value)} placeholder="cth. Engineer" className="text-xs" />{formErrors.position && <p className="text-[10px] text-destructive">{formErrors.position}</p>}</div>
+              <div className="space-y-1">
+                <Label className="text-xs">Jabatan</Label>
+                {positions.length > 0 ? (
+                  <Select value={formPosition} onValueChange={setFormPosition}>
+                    <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Pilih jabatan..." /></SelectTrigger>
+                    <SelectContent>
+                      {positions.map((p) => <SelectItem key={p.id} value={p.position} className="text-xs">{p.position}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={formPosition} onChange={(e) => setFormPosition(e.target.value)} placeholder="cth. Engineer" className="text-xs" />
+                )}
+                {formErrors.position && <p className="text-[10px] text-destructive">{formErrors.position}</p>}
+              </div>
               <div className="space-y-1"><Label className="text-xs">Department</Label><Input value={formDepartment} onChange={(e) => setFormDepartment(e.target.value)} placeholder="cth. IT" className="text-xs" />{formErrors.department && <p className="text-[10px] text-destructive">{formErrors.department}</p>}</div>
             </div>
             <div className="space-y-1">

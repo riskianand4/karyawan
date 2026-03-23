@@ -121,6 +121,11 @@ class ApiClient {
   getPositionAccess() { return this.get<Record<string, Record<string, boolean>>>("/settings/position-access"); }
   updatePositionAccess(position: string, menus: Record<string, boolean>) { return this.put("/settings/position-access", { position, menus }); }
 
+  // Dynamic Positions
+  getPositions() { return this.get<{ id: string; position: string; description: string; menus: Record<string, boolean> }[]>("/settings/positions"); }
+  createPosition(position: string, description: string) { return this.post<{ id: string; position: string; description: string; menus: Record<string, boolean> }>("/settings/positions", { position, description }); }
+  deletePosition(id: string) { return this.delete("/settings/positions/" + id); }
+
   // Tasks
   getTasks(params?: Record<string, string>) {
     const q = params ? "?" + new URLSearchParams(params).toString() : "";

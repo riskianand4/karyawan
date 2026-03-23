@@ -37,3 +37,32 @@ exports.updatePositionAccess = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getPositions = async (req, res, next) => {
+  try {
+    const positions = await settingsService.getPositions();
+    res.json(positions);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.createPosition = async (req, res, next) => {
+  try {
+    const { position, description } = req.body;
+    if (!position || !position.trim()) return res.status(400).json({ error: "Nama jabatan wajib diisi" });
+    const result = await settingsService.createPosition(position.trim(), description?.trim() || "");
+    res.status(201).json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deletePosition = async (req, res, next) => {
+  try {
+    const result = await settingsService.deletePosition(req.params.id);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};

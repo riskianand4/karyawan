@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTasks } from "@/contexts/TaskContext";
 import api from "@/lib/api";
@@ -19,6 +20,7 @@ import { CardGridSkeleton } from "@/components/PageSkeleton";
 
 const MyTeam = () => {
   const { user, users: allUsers } = useAuth();
+  const navigate = useNavigate();
   const { tasks } = useTasks();
   const [teamGroups, setTeamGroups] = useState<TeamGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -259,6 +261,7 @@ const MyTeam = () => {
                             return (
                               <div
                                 key={task.id}
+                                onClick={() => navigate(`/tasks?tab=team&teamId=${team.id}`)}
                                 className="relative overflow-hidden p-3 flex items-center gap-3.5 transition-all hover:shadow-md hover:border-primary/40 cursor-pointer group bg-background border border-border/60 rounded-xl"
                               >
                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusConfig.color}`} />

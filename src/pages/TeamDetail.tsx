@@ -153,7 +153,7 @@ const TeamDetail = () => {
           ) : teamTasks.map((task) => {
             const assignee = employees.find((u) => u.id === task.assigneeId);
             return (
-              <div key={task.id} className="ms-card p-3 flex items-center gap-3 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => setSelectedTask(task)}>
+              <div key={task.id} className="ms-card p-3 flex items-center gap-3 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => navigate(`/tasks?tab=team&teamId=${teamId}`)}>
                 <div className={`w-2 h-2 rounded-full shrink-0 ${
                   task.status === "completed" ? "bg-success" :
                   task.status === "in-progress" ? "bg-primary" :

@@ -5,7 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useMenuSettings } from "@/contexts/MenuSettingsContext";
 import api from "@/lib/api";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, User, Bell, Globe, Shield, Trash2, BarChart3, Moon, Sun, Menu, KeyRound, Briefcase } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Globe, Shield, Trash2, BarChart3, Moon, Sun, Menu, KeyRound, Briefcase, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,7 +60,10 @@ const SettingsPage = () => {
   const [localMenuSettings, setLocalMenuSettings] = useState(menuSettings);
   const [positionAccess, setPositionAccess] = useState<Record<string, Record<string, boolean>>>({});
   const [positionAccessLoading, setPositionAccessLoading] = useState(false);
-  const [DialogJabatan,setDialogJabatan] = useState(false)
+  const [dialogJabatan, setDialogJabatan] = useState(false);
+  const [dynamicPositions, setDynamicPositions] = useState<{ id: string; position: string; description: string; menus: Record<string, boolean> }[]>([]);
+  const [newPositionName, setNewPositionName] = useState("");
+  const [newPositionDesc, setNewPositionDesc] = useState("");
   useEffect(() => {
     setLocalMenuSettings(menuSettings);
   }, [menuSettings]);
@@ -82,10 +86,13 @@ const SettingsPage = () => {
   useEffect(() => {
     if (isAdmin) {
       setPositionAccessLoading(true);
-      api.getPositionAccess()
-        .then((data) => setPositionAccess(data))
-        .catch(() => {})
-        .finally(() => setPositionAccessLoading(false));
+      Promise.all([
+        api.getPositionAccess(),
+        api.getPositions().catch(() => []),
+      ]).then(([accessData, posData]) => {
+        setPositionAccess(accessData);
+        setDynamicPositions(posData);
+      }).catch(() => {}).finally(() => setPositionAccessLoading(false));
     }
   }, [isAdmin]);
 
@@ -316,8 +323,25 @@ const SettingsPage = () => {
     </div>
   );
 
-  // Get unique positions from users
-  const uniquePositions: string[] = [...new Set(allUsers.filter((u) => u.role === "employee" && u.position).map((u) => u.position))] as string[];
+  const uniquePositions: string[] = dynamicPositions.map((p) => p.position);
+
+  const handleAddPosition = async () => {
+    if (!newPositionName.trim()) {
+      toast.error("Nama jabatan wajib diisi");
+      return;
+    }
+    try {
+      const result = await api.createPosition(newPositionName.trim(), newPositionDesc.trim());
+      setDynamicPositions((prev) => [...prev, result]);
+      setPositionAccess((prev) => ({ ...prev, [result.position]: result.menus }));
+      setNewPositionName("");
+      setNewPositionDesc("");
+      setDialogJabatan(false);
+      toast.success("Jabatan berhasil ditambahkan");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menambah jabatan");
+    }
+  };
 
   const handlePositionMenuToggle = async (position: string, menuKey: string, checked: boolean) => {
     const current = positionAccess[position] || {};
@@ -330,16 +354,16 @@ const SettingsPage = () => {
       toast.error("Gagal menyimpan hak akses");
     }
   };
-  const HandleJabatan = ()=>{
-        setDialogJabatan(true)
-  }
-  
+  const handleJabatanClick = () => {
+    setDialogJabatan(true);
+  };
+
   const accessContent = (
     <div className="space-y-4">
       <div className="ms-card p-4 space-y-4">
         <div className="flex items-center justify-between gap-1.5 text-xs font-semibold text-foreground">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground"><KeyRound className="w-3.5 h-3.5 " /> Hak Akses Menu per Jabatan</span>
-          <Button onClick={HandleJabatan} className=" shadow-md ">Tambah Jabatan</Button>
+          <Button onClick={handleJabatanClick} className="shadow-md gap-1.5"><Plus className="w-3.5 h-3.5" /> Tambah Jabatan</Button>
         </div>
         <p className="text-xs text-muted-foreground">
           Atur menu mana saja yang bisa diakses oleh setiap jabatan. Menu global harus diaktifkan terlebih dahulu di tab Menu.
@@ -394,6 +418,28 @@ const SettingsPage = () => {
       ) : (
         settingsContent
       )}
+
+      {/* Dialog Tambah Jabatan */}
+      <Dialog open={dialogJabatan} onOpenChange={setDialogJabatan}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary" /> Tambah Jabatan
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Nama Jabatan</Label>
+              <Input value={newPositionName} onChange={(e) => setNewPositionName(e.target.value)} placeholder="cth. Manager" className="text-xs" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Deskripsi</Label>
+              <Input value={newPositionDesc} onChange={(e) => setNewPositionDesc(e.target.value)} placeholder="cth. Mengelola tim dan proyek" className="text-xs" />
+            </div>
+            <Button onClick={handleAddPosition} className="w-full text-xs">Tambah Jabatan</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
