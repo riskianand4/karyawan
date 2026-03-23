@@ -182,12 +182,12 @@ const MyTeam = () => {
                               <Crown className="w-3.5 h-3.5 text-warning absolute -top-1 -right-1" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                              <div className="text-sm font-semibold text-foreground flex items-center gap-1.5">
                                 {leader.name}
                                 <Badge variant="outline" className="text-[9px] border-warning/30 text-warning px-1.5 py-0">
                                   Ketua
                                 </Badge>
-                              </p>
+                              </div>
                               <p className="text-[11px] text-muted-foreground">
                                 {leader.position} — {leader.department}
                               </p>
