@@ -418,6 +418,28 @@ const SettingsPage = () => {
       ) : (
         settingsContent
       )}
+
+      {/* Dialog Tambah Jabatan */}
+      <Dialog open={dialogJabatan} onOpenChange={setDialogJabatan}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary" /> Tambah Jabatan
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Nama Jabatan</Label>
+              <Input value={newPositionName} onChange={(e) => setNewPositionName(e.target.value)} placeholder="cth. Manager" className="text-xs" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Deskripsi</Label>
+              <Input value={newPositionDesc} onChange={(e) => setNewPositionDesc(e.target.value)} placeholder="cth. Mengelola tim dan proyek" className="text-xs" />
+            </div>
+            <Button onClick={handleAddPosition} className="w-full text-xs">Tambah Jabatan</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
