@@ -371,7 +371,20 @@ const Accounts = () => {
               {formErrors.password && <p className="text-[10px] text-destructive">{formErrors.password}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1"><Label className="text-xs">Jabatan</Label><Input value={formPosition} onChange={(e) => setFormPosition(e.target.value)} placeholder="cth. Engineer" className="text-xs" />{formErrors.position && <p className="text-[10px] text-destructive">{formErrors.position}</p>}</div>
+              <div className="space-y-1">
+                <Label className="text-xs">Jabatan</Label>
+                {positions.length > 0 ? (
+                  <Select value={formPosition} onValueChange={setFormPosition}>
+                    <SelectTrigger className="text-xs h-9"><SelectValue placeholder="Pilih jabatan..." /></SelectTrigger>
+                    <SelectContent>
+                      {positions.map((p) => <SelectItem key={p.id} value={p.position} className="text-xs">{p.position}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input value={formPosition} onChange={(e) => setFormPosition(e.target.value)} placeholder="cth. Engineer" className="text-xs" />
+                )}
+                {formErrors.position && <p className="text-[10px] text-destructive">{formErrors.position}</p>}
+              </div>
               <div className="space-y-1"><Label className="text-xs">Department</Label><Input value={formDepartment} onChange={(e) => setFormDepartment(e.target.value)} placeholder="cth. IT" className="text-xs" />{formErrors.department && <p className="text-[10px] text-destructive">{formErrors.department}</p>}</div>
             </div>
             <div className="space-y-1">
