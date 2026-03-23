@@ -60,7 +60,10 @@ const SettingsPage = () => {
   const [localMenuSettings, setLocalMenuSettings] = useState(menuSettings);
   const [positionAccess, setPositionAccess] = useState<Record<string, Record<string, boolean>>>({});
   const [positionAccessLoading, setPositionAccessLoading] = useState(false);
-  const [DialogJabatan,setDialogJabatan] = useState(false)
+  const [dialogJabatan, setDialogJabatan] = useState(false);
+  const [dynamicPositions, setDynamicPositions] = useState<{ id: string; position: string; description: string; menus: Record<string, boolean> }[]>([]);
+  const [newPositionName, setNewPositionName] = useState("");
+  const [newPositionDesc, setNewPositionDesc] = useState("");
   useEffect(() => {
     setLocalMenuSettings(menuSettings);
   }, [menuSettings]);
