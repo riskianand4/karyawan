@@ -55,6 +55,7 @@ const Accounts = () => {
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [teams, setTeams] = useState<TeamGroup[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [positions, setPositions] = useState<{ id: string; position: string; description: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [profileFilter, setProfileFilter] = useState<ProfileFilter>("all");
