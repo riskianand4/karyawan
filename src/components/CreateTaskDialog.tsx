@@ -92,14 +92,18 @@ const CreateTaskDialog = ({ teams = [], isLeader = false }: CreateTaskDialogProp
           {(isAdmin || isLeader) && teams.length > 0 && (
             <div className="space-y-1">
               <Label className="text-sm">Tipe Tugas</Label>
-              <Select value={taskType} onValueChange={(v) => setTaskType(v as "personal" | "team")}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {isAdmin && <SelectItem value="personal">karyawan</SelectItem>}
-                  {!isAdmin && <SelectItem value="personal">Pribadi</SelectItem>}
-                  <SelectItem value="team">Tim</SelectItem>
-                </SelectContent>
-              </Select>
+              {isLeader && !isAdmin ? (
+                // Leader only sees team option
+                <div className="text-sm text-muted-foreground py-2 px-3 rounded-md bg-muted">Tugas Tim</div>
+              ) : (
+                <Select value={taskType} onValueChange={(v) => setTaskType(v as "personal" | "team")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="personal">karyawan</SelectItem>
+                    <SelectItem value="team">Tim</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
 
