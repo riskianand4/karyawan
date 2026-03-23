@@ -315,7 +315,11 @@ const Accounts = () => {
                       <TableCell className="text-xs text-muted-foreground">{user.position}</TableCell>
                       <TableCell className="text-xs text-muted-foreground hidden md:table-cell">{user.department}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div
+                          className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+                          onClick={() => navigate(`/accounts/${user.id}/profile`)}
+                          title="Klik untuk melengkapi profil"
+                        >
                           <Progress value={completion} className={`w-16 h-1.5 ${getCompletionBgColor(completion)}`} />
                           <span className={`text-[10px] font-medium ${getCompletionColor(completion)}`}>{completion}%</span>
                         </div>
