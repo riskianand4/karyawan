@@ -23,6 +23,9 @@ interface CreateTaskDialogProps {
 
 const CreateTaskDialog = ({ teams = [], isLeader = false }: CreateTaskDialogProps) => {
   const { addTask } = useTasks();
+  const { users, isAdmin } = useAuth();
+  const employees = users.filter((u) => u.role === "employee");
+
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -33,9 +36,6 @@ const CreateTaskDialog = ({ teams = [], isLeader = false }: CreateTaskDialogProp
   const [taskType, setTaskType] = useState<"personal" | "team">(isLeader && !isAdmin ? "team" : "personal");
   const [selectedTeamId, setSelectedTeamId] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const { users, isAdmin } = useAuth();
-  const employees = users.filter((u) => u.role === "employee");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
