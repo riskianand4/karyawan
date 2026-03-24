@@ -172,7 +172,7 @@ const SettingsPage = () => {
       {/* Statistik Personal */}
       <div className="ms-card p-4 space-y-3">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-          <BarChart3 className="w-3.5 h-3.5 text-primary" /> Statistik Saya
+          <BarChart3 className="w-3.5 h-3.5 " /> Statistik Saya
         </div>
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
@@ -184,7 +184,7 @@ const SettingsPage = () => {
             <p className="text-xs text-muted-foreground">Tugas Aktif</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-primary">{completionRate}%</p>
+            <p className="text-2xl font-bold ">{completionRate}%</p>
             <p className="text-xs text-muted-foreground">Tingkat Penyelesaian</p>
           </div>
         </div>
