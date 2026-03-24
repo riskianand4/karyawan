@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMenuSettings } from "@/contexts/MenuSettingsContext";
 import api from "@/lib/api";
 import type { User, UserDocument, Role, TeamGroup } from "@/types";
 import { calculateProfileCompletion, getCompletionColor, getCompletionBgColor, formatDocumentType, getMissingFields } from "@/lib/profileUtils";
