@@ -29,12 +29,13 @@ interface MenuSettingsContextType {
   updateMenuSettings: (settings: MenuSettings) => Promise<void>;
   loading: boolean;
   positionAccess: Record<string, Record<string, boolean>>;
+  hasAccess: (menuKey: string) => boolean;
 }
 
 const MenuSettingsContext = createContext<MenuSettingsContextType | null>(null);
 
 export const MenuSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [menuSettings, setMenuSettings] = useState<MenuSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [positionAccess, setPositionAccess] = useState<Record<string, Record<string, boolean>>>({});
@@ -72,8 +73,19 @@ export const MenuSettingsProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, []);
 
+  // hasAccess: returns true if user has CRUD (admin-like) access to a menu
+  // Admin always has access. Employee gets access if their position has it toggled on.
+  const hasAccess = useCallback((menuKey: string): boolean => {
+    if (isAdmin) return true;
+    if (!user) return false;
+    const userPosition = user.position || "";
+    const menus = positionAccess[userPosition];
+    if (!menus) return false;
+    return menus[menuKey] ?? false;
+  }, [isAdmin, user, positionAccess]);
+
   return (
-    <MenuSettingsContext.Provider value={{ menuSettings, updateMenuSettings, loading, positionAccess }}>
+    <MenuSettingsContext.Provider value={{ menuSettings, updateMenuSettings, loading, positionAccess, hasAccess }}>
       {children}
     </MenuSettingsContext.Provider>
   );

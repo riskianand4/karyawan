@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import logo from "../assets/Logo/Logo2.png";
+
 const MAIN_NAV = [
   { title: "Dasbor", url: "/", icon: LayoutDashboard, badgeKey: "", menuKey: "" },
   { title: "Tugas", url: "/tasks", icon: CheckSquare, badgeKey: "tasks", menuKey: "" },
@@ -28,7 +29,7 @@ const MAIN_NAV = [
 
 const ADMIN_NAV = [
   { title: "Laporan", url: "/reports", icon: BarChart3, badgeKey: "", menuKey: "reports" },
-  { title: "Kelola Akun", url: "/accounts", icon: UserPlus, badgeKey: "", menuKey: "" },
+  { title: "Kelola Akun", url: "/accounts", icon: UserPlus, badgeKey: "", menuKey: "accounts" },
 ];
 
 const TOOLS_NAV = [
@@ -40,7 +41,7 @@ export function AppSidebar() {
   const { user, logout, isAdmin } = useAuth();
   const { tasks } = useTasks();
   const adminBadges = useAdminBadges();
-  const { menuSettings, positionAccess } = useMenuSettings();
+  const { menuSettings, hasAccess } = useMenuSettings();
   const navigate = useNavigate();
   const location = useLocation();
   const [confirmLogout, setConfirmLogout] = useState(false);
@@ -62,29 +63,25 @@ export function AppSidebar() {
     setConfirmLogout(false);
   };
 
-  const userPosition = user?.position || "";
-  const userPositionMenus = positionAccess[userPosition] || {};
-
+  // Menu visibility: global toggle only. No position-based hiding.
+  // All globally-enabled menus are visible for all users.
   const filteredMain = MAIN_NAV.filter((item) => {
     if (!item.menuKey) return true;
-    if (!(menuSettings as any)[item.menuKey]) return false; // Global off
-    if (isAdmin) return true; // Admin sees all enabled menus
-    // For employees, check position access (if position access is configured)
-    if (Object.keys(userPositionMenus).length > 0) {
-      return userPositionMenus[item.menuKey] ?? false;
-    }
-    return true; // If no position access configured, show all global-enabled menus
+    return (menuSettings as any)[item.menuKey] ?? false;
   });
+
+  // Admin nav: show for admin always, or for employees with accounts access
   const filteredAdmin = ADMIN_NAV.filter((item) => {
-    if (!item.menuKey) return true;
-    if (!(menuSettings as any)[item.menuKey]) return false;
-    if (isAdmin) return true;
-    if (Object.keys(userPositionMenus).length > 0) {
-      return userPositionMenus[item.menuKey] ?? false;
+    if (!item.menuKey) return isAdmin;
+    // "accounts" is not in global menuSettings, it's controlled by positionAccess
+    if (item.menuKey === "accounts") {
+      return isAdmin || hasAccess("accounts");
     }
-    return true;
+    if (!(menuSettings as any)[item.menuKey]) return false;
+    return isAdmin || hasAccess(item.menuKey);
   });
-  const allItems = [...filteredMain, ...(isAdmin ? filteredAdmin : [])];
+
+  const allItems = [...filteredMain, ...filteredAdmin];
 
   const isActive = (url: string) =>
     url === "/" ? location.pathname === "/" : location.pathname.startsWith(url);

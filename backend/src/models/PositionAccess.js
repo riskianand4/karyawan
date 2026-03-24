@@ -12,6 +12,7 @@ const positionAccessSchema = new mongoose.Schema({
     team: { type: Boolean, default: false },
     notes: { type: Boolean, default: false },
     reports: { type: Boolean, default: false },
+    accounts: { type: Boolean, default: false },
   },
 }, { timestamps: true });
 

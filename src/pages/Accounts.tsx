@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMenuSettings } from "@/contexts/MenuSettingsContext";
 import api from "@/lib/api";
 import type { User, UserDocument, Role, TeamGroup } from "@/types";
 import { calculateProfileCompletion, getCompletionColor, getCompletionBgColor, formatDocumentType, getMissingFields } from "@/lib/profileUtils";
@@ -51,7 +52,9 @@ type ProfileFilter = "all" | "complete" | "incomplete";
 
 const Accounts = () => {
   const navigate = useNavigate();
-  const { users, refreshUsers } = useAuth();
+  const { users, refreshUsers, isAdmin } = useAuth();
+  const { hasAccess } = useMenuSettings();
+  const canManageAccounts = isAdmin || hasAccess("accounts");
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [teams, setTeams] = useState<TeamGroup[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
@@ -123,7 +126,10 @@ const Accounts = () => {
     return calculateProfileCompletion(user, documents);
   };
 
-  const filteredUsers = users.filter((u) => {
+  // If employee with access, filter out admin accounts
+  const visibleUsers = isAdmin ? users : users.filter((u) => u.role !== "admin");
+
+  const filteredUsers = visibleUsers.filter((u) => {
     const matchesSearch = u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           u.email.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
