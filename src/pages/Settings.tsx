@@ -35,6 +35,7 @@ const MENU_ITEMS = [
   { key: "messages", label: "Pesan" },
   { key: "team", label: "Tim" },
   { key: "reports", label: "Laporan" },
+  { key: "accounts", label: "Kelola Akun" },
 ] as const;
 
 const DEFAULT_NOTIFICATION_SETTINGS = {
@@ -77,7 +78,10 @@ const SettingsPage = () => {
 
   const initials = name.split(" ").map((n) => n[0]).join("") || "?";
 
-  const myTasks = user ? tasks.filter((t) => t.assigneeId === user.id || user.role === "admin") : [];
+  const myTasks = user ? tasks.filter((t) => {
+    if (user.role === "admin") return true;
+    return t.assigneeId === user.id;
+  }) : [];
   const completedTasks = myTasks.filter((t) => t.status === "completed").length;
   const activeTasks = myTasks.filter((t) => t.status !== "completed").length;
   const completionRate = myTasks.length > 0 ? Math.round((completedTasks / myTasks.length) * 100) : 0;
