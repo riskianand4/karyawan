@@ -35,6 +35,7 @@ const MENU_ITEMS = [
   { key: "messages", label: "Pesan" },
   { key: "team", label: "Tim" },
   { key: "reports", label: "Laporan" },
+  { key: "accounts", label: "Kelola Akun" },
 ] as const;
 
 const DEFAULT_NOTIFICATION_SETTINGS = {
