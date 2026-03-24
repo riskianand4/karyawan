@@ -52,7 +52,9 @@ type ProfileFilter = "all" | "complete" | "incomplete";
 
 const Accounts = () => {
   const navigate = useNavigate();
-  const { users, refreshUsers } = useAuth();
+  const { users, refreshUsers, isAdmin } = useAuth();
+  const { hasAccess } = useMenuSettings();
+  const canManageAccounts = isAdmin || hasAccess("accounts");
   const [documents, setDocuments] = useState<UserDocument[]>([]);
   const [teams, setTeams] = useState<TeamGroup[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
