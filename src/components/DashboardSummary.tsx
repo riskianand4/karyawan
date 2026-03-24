@@ -70,7 +70,7 @@ const DashboardSummary = () => {
       alerts.push({
         icon: MessageCircleCodeIcon,
         text: `${unreadMessages} pesan belum dibaca`,
-        color: "text-primary bg-primary/10",
+        color: "bg-primary",
       });
     }
     if (recentlyCompleted.length > 0 && alerts.length === 0) {

@@ -169,30 +169,48 @@ const Dashboard = () => {
         return (
           <div className="ms-card p-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><StickyNote className="w-3.5 h-3.5 text-primary" /> Catatan Saya</h2>
+              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><StickyNote className="w-3.5 h-3.5 " /> Catatan Saya</h2>
               <Button variant="ghost" size="sm" className="text-[10px] gap-1 h-6 px-2" onClick={() => navigate("/notes")}>Lihat semua <ArrowRight className="w-2.5 h-2.5" /></Button>
             </div>
             {/* Admin notes as notifications */}
-            {recentAdminNotes.length > 0 && (
-              <div className="space-y-1.5 mb-3">
-                {recentAdminNotes.map((note) => (
-                  <div
-                    key={note.id}
-                    className={`flex items-start gap-2 p-2 rounded-md cursor-pointer transition-colors ${note.priority === "important" ? "bg-destructive/5 border border-destructive/20" : "bg-warning/5 border border-warning/20"}`}
-                    onClick={() => navigate("/notes")}
-                  >
-                    <Bell className="w-3 h-3 mt-0.5 text-warning shrink-0" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <Badge variant="outline" className="text-[8px] px-1 py-0 border-warning text-warning">Admin</Badge>
-                        {note.priority === "important" && <Badge variant="destructive" className="text-[8px] px-1 py-0">!</Badge>}
-                      </div>
-                      <p className="text-[11px] text-foreground line-clamp-2 mt-0.5">{note.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+           {recentAdminNotes.length > 0 && (
+  <div className="space-y-1.5 mb-3">
+    {recentAdminNotes.slice(0, 1).map((note) => (
+      <div
+        key={note.id}
+        className={`flex items-start gap-2 p-2 rounded-md cursor-pointer transition-colors ${
+          note.priority === "important"
+            ? "bg-destructive/5 border border-destructive/20"
+            : "bg-warning/5 border border-warning/20"
+        }`}
+        onClick={() => navigate("/notes")}
+      >
+        <Bell className="w-3 h-3 mt-0.5 text-warning shrink-0" />
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <Badge
+              variant="outline"
+              className="text-[8px] px-1 py-0 border-warning text-warning"
+            >
+              Admin
+            </Badge>
+            {note.priority === "important" && (
+              <Badge
+                variant="destructive"
+                className="text-[8px] px-1 py-0"
+              >
+                !
+              </Badge>
             )}
+          </div>
+          <p className="text-[11px] text-foreground line-clamp-2 mt-0.5">
+            {note.content}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
             {/* Daily notes */}
             {todayNotes.length > 0 ? (
               <div className="space-y-1.5">

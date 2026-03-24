@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMenuSettings } from "@/contexts/MenuSettingsContext";
@@ -15,6 +15,10 @@ import {
   StickyNote,
   Trash2,
   X,
+  Layers,
+  ShieldCheck,
+  Clock,
+  MessageSquarePlus,
 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -41,29 +45,104 @@ import { id as localeID } from "date-fns/locale";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import EmployeeGrid, { EmployeeHeader } from "@/components/EmployeeGrid";
 
-// Random rotation for sticky notes
-const ROTATIONS = [-3, -2, -1, 0, 1, 2, 3];
-function getRotation(id: string): number {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = ((hash << 5) - hash) + id.charCodeAt(i);
-  return ROTATIONS[Math.abs(hash) % ROTATIONS.length];
-}
-
 const STICKY_COLORS = [
-  "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800",
-  "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",
-  "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800",
-  "bg-pink-50 dark:bg-pink-950/30 border-pink-200 dark:border-pink-800",
-  "bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800",
+  "bg-amber-900 text-foreground",
+  "bg-blue-900 text-foreground",
+  "bg-green-900 text-foreground",
+  "bg-pink-900 text-foreground",
+  "bg-purple-900 text-foreground",
 ];
-const ADMIN_STICKY_COLOR = "bg-warning/10 border-warning/40";
+const ADMIN_STICKY_COLOR = "bg-primary text-foreground";
+const ADMIN_IMPORTANT_COLOR = "bg-primary text-foreground";
 
-function getStickyColor(id: string): string {
+function getStickyColor(id: string, isAdmin?: boolean, priority?: string): string {
+  if (isAdmin) {
+    return priority === "important" ? ADMIN_IMPORTANT_COLOR : ADMIN_STICKY_COLOR;
+  }
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = ((hash << 5) - hash) + id.charCodeAt(i);
   return STICKY_COLORS[Math.abs(hash) % STICKY_COLORS.length];
 }
 
+function generateNoteTransform() {
+  const randomX = 2 + Math.random() * 70;
+  const randomY = 2 + Math.random() * 65;
+  const randomRot = -4 + Math.random() * 8;
+  return { x: `${randomX}%`, y: `${randomY}%`, rot: randomRot };
+}
+
+// ─── Admin Sticky Note Card ───────────────────────────────────────────────────
+function AdminStickyCard({
+  note,
+  onDelete,
+}: {
+  note: AdminNote;
+  onDelete?: (id: string) => void;
+}) {
+  const isImportant = note.priority === "important";
+  const colorStyle = isImportant ? ADMIN_IMPORTANT_COLOR : ADMIN_STICKY_COLOR;
+  const rot = useRef((-3 + Math.random() * 6).toFixed(2)).current;
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.85, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.18 } }}
+      className={`group relative w-full min-h-[10rem] p-4 flex flex-col rounded-sm rounded-br-[28px]
+        shadow-[0_4px_12px_rgba(0,0,0,0.10)] hover:shadow-[0_8px_18px_rgba(0,0,0,0.14)]
+        transition-shadow cursor-default ${colorStyle}`}
+      style={{ transform: `rotate(${rot}deg)` }}
+    >
+      {/* Admin badge strip */}
+      <div
+        className={`absolute top-0 left-0 right-0 flex items-center gap-1.5 px-3 py-1 rounded-t-sm text-[9px] font-bold tracking-widest uppercase
+          ${isImportant
+            ? "bg-destructive/30 text-destructive"
+            : "bg-warning/30 text-warning"
+          }`}
+      >
+        <ShieldCheck className="w-3 h-3 flex-shrink-0" />
+        {isImportant ? "Admin · Penting" : "Admin · Normal"}
+      </div>
+
+      {/* Spacer for badge strip */}
+      <div className="h-4 mb-2" />
+
+      {/* Content */}
+      <div className="flex-grow pointer-events-none">
+        <p className="text-xs leading-relaxed whitespace-pre-wrap line-clamp-6">
+          {note.content}
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between mt-3 pt-2 border-t border-black/5 dark:border-white/5">
+        <span className="text-[9px] opacity-60 flex items-center gap-1">
+          <Clock className="w-2.5 h-2.5" />
+          {format(new Date(note.createdAt), "d MMM, HH:mm", { locale: localeID })}
+        </span>
+        {onDelete && (
+          <button
+            onClick={() => onDelete(note.id)}
+            className="opacity-30 hover:opacity-90 hover:text-destructive transition-opacity p-1"
+            title="Hapus"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+
+      {/* Paper-fold ornament */}
+      <div className="absolute bottom-0 right-0 w-8 h-8 bg-black/5 dark:bg-white/5 rounded-br-3xl
+        border-l border-t border-black/5 dark:border-white/5 rounded-tl-lg
+        shadow-[-2px_-2px_6px_rgba(0,0,0,0.05)] pointer-events-none
+        transition-all duration-300 group-hover:w-9 group-hover:h-9" />
+    </motion.div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const Notes = () => {
   const { employeeId } = useParams();
   const navigate = useNavigate();
@@ -73,6 +152,8 @@ const Notes = () => {
   const [adminNotes, setAdminNotes] = useState<AdminNote[]>([]);
   const [adminNoteContent, setAdminNoteContent] = useState("");
   const [adminNotePriority, setAdminNotePriority] = useState<"normal" | "important">("normal");
+  const [isSending, setIsSending] = useState(false);
+  const [confirmAdminDelete, setConfirmAdminDelete] = useState<string | null>(null);
 
   const [currentDate, setCurrentDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [dailyNotes, setDailyNotes] = useState<DailyNote[]>([]);
@@ -81,7 +162,14 @@ const Notes = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<(DailyNote | AdminNote) | null>(null);
 
-  // Check if employee has CRUD access to notes (like admin)
+  const [filterMode, setFilterMode] = useState<"all" | "date">("all");
+  const boardRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const [highestZ, setHighestZ] = useState(10);
+  const [noteTransforms, setNoteTransforms] = useState<
+    Record<string, { x: string; y: string; rot: number; z: number }>
+  >({});
+
   const hasNotesAccess = hasAccess("notes");
 
   useEffect(() => {
@@ -96,7 +184,9 @@ const Notes = () => {
   const prevDay = () => setCurrentDate(format(subDays(new Date(currentDate), 1), "yyyy-MM-dd"));
   const nextDay = () => setCurrentDate(format(addDays(new Date(currentDate), 1), "yyyy-MM-dd"));
 
-  // Admin or employee with notes access → show employee grid
+  // ============================================================
+  // VIEW: ADMIN MELIHAT DAFTAR KARYAWAN
+  // ============================================================
   if ((isAdmin || hasNotesAccess) && !employeeId) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
@@ -108,13 +198,16 @@ const Notes = () => {
     );
   }
 
-  // Admin/access view for specific employee
+  // ============================================================
+  // VIEW: ADMIN MENGIRIM CATATAN KE KARYAWAN — 2-Column Layout
+  // ============================================================
   if ((isAdmin || hasNotesAccess) && employeeId) {
     const empNotes = adminNotes.filter((n) => n.toEmployeeId === employeeId);
     const empName = users.find((u) => u.id === employeeId)?.name || "";
 
     const handleSendNote = async () => {
       if (!adminNoteContent.trim() || !user) return;
+      setIsSending(true);
       try {
         const note = await api.createAdminNote({
           toEmployeeId: employeeId,
@@ -126,65 +219,207 @@ const Notes = () => {
         toast.success(`Catatan terkirim ke ${empName}`);
       } catch {
         toast.error("Gagal mengirim catatan");
+      } finally {
+        setIsSending(false);
+      }
+    };
+
+    const handleAdminDeleteNote = async (id: string) => {
+      try {
+        await api.deleteAdminNote(id); // sesuaikan dengan API Anda
+        setAdminNotes((prev) => prev.filter((n) => n.id !== id));
+        setConfirmAdminDelete(null);
+        toast.success("Catatan dihapus");
+      } catch {
+        toast.error("Gagal menghapus catatan");
       }
     };
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 max-w-8xl">
         <EmployeeHeader employeeId={employeeId} backPath="/notes" />
-        <div className="ms-card p-5 space-y-3">
-          <h2 className="text-xs font-semibold text-foreground">Kirim Catatan ke {empName}</h2>
-          <div className="space-y-1">
-            <Label className="text-xs">Prioritas</Label>
-            <Select value={adminNotePriority} onValueChange={(v) => setAdminNotePriority(v as "normal" | "important")}>
-              <SelectTrigger className="text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="normal" className="text-xs">Normal</SelectItem>
-                <SelectItem value="important" className="text-xs">Penting (Mencolok)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Textarea value={adminNoteContent} onChange={(e) => setAdminNoteContent(e.target.value)} placeholder="Tulis instruksi atau pengingat..." className="text-sm" rows={3} />
-          <Button onClick={handleSendNote} className="text-xs gap-1" disabled={!adminNoteContent.trim()}>
-            <Send className="w-3 h-3" /> Kirim
-          </Button>
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold text-foreground">Catatan Terkirim ({empNotes.length})</h2>
-          {empNotes.length === 0 ? (
-            <EmptyState icon={StickyNote} title="Belum ada catatan" description="Kirim catatan atau instruksi kepada karyawan ini menggunakan form di atas." compact />
-          ) : empNotes.map((note) => (
-            <div key={note.id} className={`rounded-lg p-3 border-l-4 ${note.priority === "important" ? "bg-destructive/5 border-l-destructive" : "bg-warning/5 border-l-warning"}`}>
-              <div className="flex items-center gap-2 mb-1">
-                {note.priority === "important" && <Badge variant="destructive" className="text-[9px] px-1.5 py-0">PENTING</Badge>}
-                <span className="text-[10px] text-muted-foreground">{note.createdAt}</span>
+
+        {/* 2-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
+
+          {/* KIRI: Form kirim catatan */}
+          <div className="lg:col-span-2 space-y-3">
+            <div className="ms-card p-5 space-y-4">
+              {/* Header form */}
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center">
+                  <MessageSquarePlus className="w-4 h-4 " />
+                </div>
+                <div>
+                  <h2 className="text-xs font-semibold text-foreground leading-none">Kirim Catatan</h2>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">ke {empName}</p>
+                </div>
               </div>
-              <p className="text-sm text-foreground">{note.content}</p>
+
+              {/* Prioritas */}
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                  Prioritas
+                </Label>
+                <Select
+                  value={adminNotePriority}
+                  onValueChange={(v) => setAdminNotePriority(v as "normal" | "important")}
+                >
+                  <SelectTrigger className="text-xs h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal" className="text-xs">
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-warning inline-block" />
+                        Normal
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="important" className="text-xs">
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-destructive inline-block" />
+                        Penting (Mencolok)
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Preview label warna */}
+              <div
+                className={`rounded-md px-3 py-2 text-[10px] font-semibold flex items-center gap-1.5 transition-colors
+                  ${adminNotePriority === "important"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-warning/10 text-warning"
+                  }`}
+              >
+                <ShieldCheck className="w-3 h-3" />
+                {adminNotePriority === "important"
+                  ? "Catatan ini akan ditandai PENTING — menonjol di papan karyawan"
+                  : "Catatan ini akan muncul dengan label Admin di papan karyawan"}
+              </div>
+
+              {/* Textarea */}
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                  Isi Catatan
+                </Label>
+                <Textarea
+                  value={adminNoteContent}
+                  onChange={(e) => setAdminNoteContent(e.target.value.slice(0, 2000))}
+                  placeholder="Tulis instruksi, pengingat, atau arahan untuk karyawan..."
+                  className="text-sm resize-none min-h-[240px]"
+                  rows={5}
+                />
+                <div className="flex justify-end">
+                  <span className="text-[10px] text-muted-foreground">{adminNoteContent.length}/2000</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleSendNote}
+                className="w-full text-xs gap-1.5"
+                disabled={!adminNoteContent.trim() || isSending}
+              >
+                <Send className="w-3.5 h-3.5" />
+                {isSending ? "Mengirim..." : "Kirim ke Papan Karyawan"}
+              </Button>
             </div>
-          ))}
+          </div>
+
+          {/* KANAN: Daftar catatan terkirim sebagai sticky grid */}
+          <div className="lg:col-span-3 space-y-3">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              {empNotes.some(n => n.priority === "important") && (
+                <Badge variant="destructive" className="text-[9px] px-1.5 py-0 gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5" />
+                  Ada catatan penting
+                </Badge>
+              )}
+            </div>
+
+            {/* Sticky grid */}
+            {empNotes.length === 0 ? (
+              <div className="ms-card">
+                <EmptyState
+                  icon={StickyNote}
+                  title="Belum ada catatan"
+                  description="Catatan yang kamu kirim ke karyawan ini akan muncul di sini sebagai sticky note."
+                  compact
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <AnimatePresence>
+                  {empNotes.map((note) => (
+                    <AdminStickyCard
+                      key={note.id}
+                      note={note}
+                      onDelete={(id) => setConfirmAdminDelete(id)}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Confirm delete admin note */}
+        <ConfirmDialog
+          open={!!confirmAdminDelete}
+          onOpenChange={(open) => { if (!open) setConfirmAdminDelete(null); }}
+          title="Hapus catatan ini?"
+          description="Catatan yang dihapus tidak dapat dikembalikan dan akan hilang dari papan karyawan."
+          confirmText="Hapus"
+          variant="destructive"
+          onConfirm={() => confirmAdminDelete && handleAdminDeleteNote(confirmAdminDelete)}
+        />
       </motion.div>
     );
   }
 
-  // Employee view — 2-column layout with bulletin board
-  const notesForDate = dailyNotes.filter((n) => n.date === currentDate).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  // ============================================================
+  // VIEW: KARYAWAN MELIHAT PAPAN CATATAN (DRAG & DROP)
+  // ============================================================
   const myAdminNotes = adminNotes.filter((n) => n.toEmployeeId === user?.id);
-  const allBoardNotes: (DailyNote | AdminNote)[] = [
+  const allBoardNotes: (DailyNote | AdminNote & { _type: "admin" } | DailyNote & { _type: "daily" })[] = [
     ...dailyNotes.map((n) => ({ ...n, _type: "daily" as const })),
     ...myAdminNotes.map((n) => ({ ...n, _type: "admin" as const })),
   ].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
+  const displayedNotes = filterMode === "all"
+    ? allBoardNotes
+    : allBoardNotes.filter(n => {
+        if (n._type === "daily") return n.date === currentDate;
+        return n.createdAt.startsWith(currentDate);
+      });
+
+  useEffect(() => {
+    setNoteTransforms((prev) => {
+      const newTransforms = { ...prev };
+      let changed = false;
+      displayedNotes.forEach(note => {
+        if (!newTransforms[note.id]) {
+          newTransforms[note.id] = { ...generateNoteTransform(), z: 1 };
+          changed = true;
+        }
+      });
+      return changed ? newTransforms : prev;
+    });
+  }, [displayedNotes]);
+
   const doAddNote = async () => {
     if (!newNoteText.trim() || !user) return;
     try {
-      const note = await api.createDailyNote({ date: currentDate, content: newNoteText.trim() });
+      const targetDate = filterMode === "date" ? currentDate : format(new Date(), "yyyy-MM-dd");
+      const note = await api.createDailyNote({ date: targetDate, content: newNoteText.trim() });
       setDailyNotes((prev) => [note, ...prev]);
       setNewNoteText("");
       setConfirmSave(false);
-      toast.success("Catatan tersimpan");
+      toast.success("Catatan tersimpan di papan");
     } catch {
-      toast.error("Gagal menyimpan");
+      toast.error("Gagal menyimpan catatan");
       setConfirmSave(false);
     }
   };
@@ -203,139 +438,186 @@ const Notes = () => {
 
   const isAdminNote = (note: any): note is AdminNote => "fromAdminId" in note;
 
+  const bringToFront = (id: string) => {
+    setHighestZ(prev => prev + 1);
+    setNoteTransforms(prev => ({
+      ...prev,
+      [id]: { ...prev[id], z: highestZ + 1 }
+    }));
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <StickyNote className="w-5 h-5 text-primary" /> Catatan
-      </h1>
 
-      {/* Admin notes notification bar */}
-      {myAdminNotes.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">Catatan dari Admin</h2>
-          {myAdminNotes.slice(0, 3).map((note) => (
-            <div key={note.id} className={`rounded-lg p-3 border-l-4 ${note.priority === "important" ? "bg-destructive/5 border-l-destructive" : "bg-warning/5 border-l-warning"}`}>
-              <div className="flex items-center gap-2 mb-1">
-                {note.priority === "important" && <Badge variant="destructive" className="text-[9px] px-1.5 py-0">PENTING</Badge>}
-                <span className="text-[10px] text-muted-foreground">{note.createdAt}</span>
-              </div>
-              <p className="text-sm text-foreground">{note.content}</p>
-            </div>
-          ))}
+      {/* Header & Filter */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <StickyNote className="w-5 h-5" /> Catatan
+        </h1>
+        <div className="bg-background p-1 rounded-md shadow-sm border inline-flex">
+          <button
+            onClick={() => setFilterMode("all")}
+            className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              filterMode === "all" ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" />
+            Tampilkan Semua
+          </button>
+          <button
+            onClick={() => setFilterMode("date")}
+            className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+              filterMode === "date" ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" />
+            Berdasarkan Tanggal
+          </button>
         </div>
-      )}
+      </div>
+      {/* 2-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 h-[75vh]">
 
-      {/* 2-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Left: Form */}
-        <div className="space-y-4">
-          {/* Date nav */}
-          <div className="ms-card p-3 flex items-center justify-between">
-            <Button variant="ghost" size="icon" className="w-8 h-8" onClick={prevDay}>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm font-medium text-foreground">
-                {format(new Date(currentDate), "EEEE, d MMMM yyyy", { locale: localeID })}
-              </span>
-              -
-              <Input type="date" value={currentDate} onChange={(e) => e.target.value && setCurrentDate(e.target.value)} className="w-auto h-7 text-xs bg-transparent border-none px-0" />
-            </div>
-            <Button variant="ghost" size="icon" className="w-8 h-8" onClick={nextDay}>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
+        {/* KIRI: Form & Navigasi */}
+        <div className="lg:col-span-4 flex flex-col gap-4 h-full">
+          <AnimatePresence>
+            {filterMode === "date" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                className="ms-card p-3 flex items-center justify-between"
+              >
+                <Button variant="ghost" size="icon" className="w-8 h-8" onClick={prevDay}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-medium text-foreground">
+                    {format(new Date(currentDate), "d MMMM yyyy", { locale: localeID })}
+                  </span>
+                  <Input
+                    type="date"
+                    value={currentDate}
+                    onChange={(e) => e.target.value && setCurrentDate(e.target.value)}
+                    className="w-[110px] h-6 text-[10px] bg-transparent border-none p-0 text-center text-muted-foreground focus-visible:ring-0 shadow-none"
+                  />
+                </div>
+                <Button variant="ghost" size="icon" className="w-8 h-8" onClick={nextDay}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Add note form */}
-          <div className="ms-card p-4 space-y-3">
+          <div className="ms-card p-4 space-y-3 flex flex-col flex-grow">
             <h2 className="text-xs font-semibold text-foreground">
-              Tambah Catatan untuk {format(new Date(currentDate), "d MMMM yyyy", { locale: localeID })}
+              {filterMode === "date" ? `Tambah Catatan (${format(new Date(currentDate), "d MMM")})` : "Tambah Catatan Baru"}
             </h2>
             <Textarea
               value={newNoteText}
               onChange={(e) => setNewNoteText(e.target.value.slice(0, 2000))}
-              placeholder="Tulis catatan harian..."
-              className="min-h-[80px] text-sm"
+              placeholder="Tulis catatan harian atau tugas..."
+              className="flex-grow min-h-[150px] text-sm resize-none bg-transparent"
             />
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-2">
               <span className="text-[10px] text-muted-foreground">{newNoteText.length}/2000</span>
               <Button size="sm" className="gap-1 text-xs" onClick={() => { if (newNoteText.trim()) setConfirmSave(true); }} disabled={!newNoteText.trim()}>
-                <Plus className="w-3 h-3" /> Simpan
+                <Plus className="w-3 h-3" /> Tempel di Papan
               </Button>
             </div>
           </div>
-
-          {/* Notes for selected date */}
-          <div className="space-y-2">
-            <h2 className="text-xs font-semibold text-foreground">Catatan Hari Ini ({notesForDate.length})</h2>
-            {notesForDate.length === 0 ? (
-              <EmptyState icon={StickyNote} title="Belum ada catatan" description="Belum ada catatan untuk tanggal ini." compact />
-            ) : notesForDate.map((note) => (
-              <div key={note.id} className="ms-card p-3 group">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{note.content}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {format(new Date(note.createdAt), "HH:mm", { locale: localeID })}
-                    </p>
-                  </div>
-                  <Button size="icon" variant="ghost" className="w-7 h-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0" onClick={() => setConfirmDelete(note.id)}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Right: Bulletin Board */}
-        <div className="space-y-3">
-          <h2 className="text-xs font-semibold text-foreground flex items-center gap-2">
-            <StickyNote className="w-3.5 h-3.5 text-primary" /> Papan Catatan
-          </h2>
-          <div className="min-h-[400px] rounded-xl border-2 border-dashed border-border bg-muted/30 p-4">
-            {allBoardNotes.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px]">
+        {/* KANAN: Papan Buletin (Drag & Drop Canvas) */}
+        <div className="lg:col-span-8 relative h-full">
+          <div
+            ref={boardRef}
+            className="absolute inset-0 rounded-xl border-2 border-dashed border-border bg-muted/30 overflow-hidden"
+          >
+            {displayedNotes.length === 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <p className="text-sm text-muted-foreground">Papan catatan masih kosong</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {allBoardNotes.map((note) => {
-                  const isAdmin = isAdminNote(note);
-                  const rotation = getRotation(note.id);
-                  const colorClass = isAdmin ? ADMIN_STICKY_COLOR : getStickyColor(note.id);
+              <AnimatePresence>
+                {displayedNotes.map((note) => {
+                  const noteIsAdmin = note._type === "admin";
+                  const priority = noteIsAdmin ? (note as AdminNote).priority : "normal";
+                  const colorStyle = getStickyColor(note.id, noteIsAdmin, priority);
+                  const transform = noteTransforms[note.id] || { x: '50%', y: '50%', rot: 0, z: 1 };
 
                   return (
                     <motion.div
                       key={note.id}
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      whileHover={{ scale: 1.05, rotate: 0, zIndex: 10 }}
-                      style={{ rotate: `${rotation}deg` }}
-                      className={`cursor-pointer rounded-lg border p-3 shadow-sm hover:shadow-md transition-shadow ${colorClass}`}
-                      onClick={() => setSelectedNote(note)}
+                      drag
+                      dragConstraints={boardRef}
+                      dragMomentum={false}
+                      onDragStart={() => { isDragging.current = true; }}
+                      onDragEnd={() => { setTimeout(() => { isDragging.current = false; }, 150); }}
+                      onPointerDown={() => bringToFront(note.id)}
+                      whileDrag={{ scale: 1.05, cursor: "grabbing" }}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                      style={{
+                        position: "absolute",
+                        left: transform.x,
+                        top: transform.y,
+                        rotate: `${transform.rot}deg`,
+                        zIndex: transform.z,
+                      }}
+                      className={`group relative w-40 sm:w-44 min-h-[11rem] flex flex-col rounded-sm rounded-br-[28px] shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.12)] cursor-grab transition-shadow ${colorStyle}`}
+                      onClick={(e) => {
+                        if (isDragging.current) { e.preventDefault(); return; }
+                        setSelectedNote(note);
+                      }}
                     >
-                      {isAdmin && (
-                        <div className="flex items-center gap-1 mb-1.5">
-                          <Badge variant="outline" className="text-[8px] px-1 py-0 border-warning text-warning">
-                            Admin
-                          </Badge>
-                          {(note as AdminNote).priority === "important" && (
-                            <Badge variant="destructive" className="text-[8px] px-1 py-0">!</Badge>
-                          )}
+                      {/* Admin badge strip di bagian atas sticky */}
+                      {noteIsAdmin && (
+                        <div
+                          className={`flex items-center gap-1 px-2.5 py-1 text-[8px] font-bold tracking-widest uppercase rounded-t-sm flex-shrink-0
+                            ${priority === "important"
+                              ? "bg-destructive/30 text-destructive"
+                              : "bg-warning/30 text-warning"
+                            }`}
+                        >
+                          <ShieldCheck className="w-2.5 h-2.5 flex-shrink-0" />
+                          {priority === "important" ? "Admin · Penting" : "Admin"}
                         </div>
                       )}
-                      <p className="text-xs text-foreground line-clamp-4 whitespace-pre-wrap">
-                        {note.content}
-                      </p>
-                      <p className="text-[9px] text-muted-foreground mt-2">
-                        {format(new Date(note.createdAt), "d MMM, HH:mm", { locale: localeID })}
-                      </p>
+
+                      {/* Inner padding */}
+                      <div className="p-3 flex flex-col flex-grow">
+                        {/* Note Header */}
+                        <div className="flex justify-between items-start mb-2 relative z-10">
+                          <p className="text-[9px] opacity-70">
+                            {format(new Date(note.createdAt), "d MMM, HH:mm", { locale: localeID })}
+                          </p>
+                          {!noteIsAdmin && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setConfirmDelete(note.id); }}
+                              className="opacity-40 hover:opacity-100 hover:text-destructive transition-opacity p-1 -mr-1 -mt-1"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-grow mt-1 pointer-events-none relative z-10">
+                          <p className="text-xs leading-relaxed whitespace-pre-wrap line-clamp-6">
+                            {note.content}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Paper-fold ornament */}
+                      <div className="absolute bottom-0 right-0 w-8 h-8 bg-black/5 dark:bg-white/5 rounded-br-3xl border-l border-t border-black/5 dark:border-white/5 rounded-tl-lg shadow-[-2px_-2px_6px_rgba(0,0,0,0.05)] pointer-events-none transition-all duration-300 group-hover:w-9 group-hover:h-9" />
                     </motion.div>
                   );
                 })}
-              </div>
+              </AnimatePresence>
             )}
           </div>
         </div>
@@ -346,21 +628,34 @@ const Notes = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-sm flex items-center gap-2">
-              <StickyNote className="w-4 h-4 text-primary" />
+              <StickyNote className="w-4 h-4" />
               {selectedNote && isAdminNote(selectedNote) ? "Catatan dari Admin" : "Catatan Harian"}
             </DialogTitle>
           </DialogHeader>
           {selectedNote && (
             <div className="space-y-3">
-              {isAdminNote(selectedNote) && selectedNote.priority === "important" && (
-                <Badge variant="destructive" className="text-[9px]">PENTING</Badge>
+              {isAdminNote(selectedNote) && (
+                <Badge
+                  variant={selectedNote.priority === "important" ? "destructive" : "outline"}
+                  className={`text-[9px] gap-1 ${selectedNote.priority !== "important" ? "border-warning text-warning" : ""}`}
+                >
+                  <ShieldCheck className="w-2.5 h-2.5" />
+                  {selectedNote.priority === "important" ? "Admin · Penting" : "Admin · Normal"}
+                </Badge>
               )}
-              <p className="text-sm text-foreground whitespace-pre-wrap">{selectedNote.content}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap max-h-96 overflow-y-auto">
+                {selectedNote.content}
+              </p>
               <p className="text-[10px] text-muted-foreground">
                 {format(new Date(selectedNote.createdAt), "EEEE, d MMMM yyyy HH:mm", { locale: localeID })}
               </p>
               {!isAdminNote(selectedNote) && (
-                <Button variant="destructive" size="sm" className="text-xs gap-1" onClick={() => setConfirmDelete(selectedNote.id)}>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="text-xs gap-1 mt-2"
+                  onClick={() => { setConfirmDelete(selectedNote.id); setSelectedNote(null); }}
+                >
                   <Trash2 className="w-3 h-3" /> Hapus Catatan
                 </Button>
               )}
@@ -369,7 +664,14 @@ const Notes = () => {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDialog open={confirmSave} onOpenChange={setConfirmSave} title="Simpan catatan?" description="Catatan akan disimpan untuk tanggal ini." confirmText="Ya, Simpan" onConfirm={doAddNote} />
+      <ConfirmDialog
+        open={confirmSave}
+        onOpenChange={setConfirmSave}
+        title="Simpan catatan?"
+        description="Catatan akan disimpan ke papan."
+        confirmText="Ya, Simpan"
+        onConfirm={doAddNote}
+      />
       <ConfirmDialog
         open={!!confirmDelete}
         onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}

@@ -960,7 +960,7 @@ const Vault = () => {
         </TabsContent>
 
         <TabsContent value="creds" className="space-y-4 mt-4">
-          <div className="p-3 rounded-lg bg-warning/5 border border-warning/20 text-xs text-warning flex items-center gap-2">
+          <div className="p-3 rounded-lg bg-warning/5 border border-warning/20 text-xs text-warning flex items-center gap-2 max-w-[500px]">
             <Lock className="w-4 h-4 shrink-0" />
             <span>
               Ruang ini bersifat pribadi dan terenkripsi. Admin tidak dapat
