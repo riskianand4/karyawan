@@ -1,99 +1,92 @@
 
-Tujuan perbaikan (sesuai kebutuhan Anda):
-1) Dashboard karyawan harus menampilkan tugas pribadi + tugas tim.
-2) Buat Tugas hanya untuk Admin dan Ketua Tim, dan Ketua Tim hanya bisa buat tugas tim.
-3) Vault favicon harus fallback ke ikon default lokal jika favicon website gagal.
-4) Klik tugas tim di halaman Tim harus membuka /tasks pada tab Tim.
-5) Kelola Akun: admin klik “Kelengkapan” langsung masuk halaman khusus untuk melengkapi profil karyawan.
-6) Settings > Hak Akses: jabatan tidak hardcode, admin bisa tambah jabatan (nama + deskripsi), lalu dipakai di aturan menu dan dropdown jabatan saat buat akun.
 
-Rencana implementasi (urut kerja):
-1. Perketat aturan di backend (agar tidak bisa dibypass dari client)
-   - Task create permission:
-     - Admin: boleh buat personal & team.
-     - Employee non-leader: ditolak buat task.
-     - Leader: hanya boleh buat task type=team, dan hanya untuk team yang dia pimpin.
-   - Validasi payload task:
-     - personal wajib assigneeId.
-     - team wajib teamId valid.
-   - Tambah endpoint jabatan dinamis:
-     - GET daftar jabatan.
-     - POST tambah jabatan (nama unik + deskripsi).
-   - Simpan jabatan di sumber data yang sama dengan hak akses (PositionAccess) supaya sinkron otomatis.
+# Rencana Perbaikan: Hak Akses, Dashboard Catatan, Redesign Notes, Statistik
 
-2. Dashboard karyawan tampilkan tugas tim
-   - Ubah filter dashboard agar untuk employee memakai seluruh task yang memang sudah boleh diakses (personal + team), bukan hanya assigneeId pribadi.
-   - Rangkuman dashboard (alert/deadline/today tasks) ikut menghitung task tim.
+## Ringkasan Perubahan
 
-3. Perbaiki flow halaman Tugas sesuai role
-   - CreateTaskDialog:
-     - Admin: tetap bisa pilih personal/team.
-     - Leader: hanya opsi team (opsi personal dihapus).
-     - Non-leader: tidak ada tombol buat tugas.
-   - Tasks page:
-     - Leader tetap melihat tombol buat tugas.
-     - Dialog leader hanya menampilkan daftar team yang dia pimpin.
+Ada 4 perbaikan utama yang perlu dilakukan:
 
-4. Sinkron “klik tugas tim” dari halaman Tim ke /tasks tab Tim
-   - MyTeam: item tugas tim dibuat clickable ke /tasks?tab=team&teamId=...
-   - TeamDetail (admin): item tugas tim juga diarahkan ke /tasks?tab=team&teamId=...
-   - Tasks page membaca query param:
-     - employee: auto aktif tab “Tim”.
-     - admin: auto pilih tim terkait (selectedTeamId).
+### 1. Ubah Logika Hak Akses (Bukan Sembunyikan Menu, Tapi Beri Kemampuan CRUD)
 
-5. Vault favicon fallback default icon
-   - Tambahkan asset default icon sesuai path yang Anda minta (`src/assets/iconDefault.ico`).
-   - Komponen favicon:
-     - jika favicon website gagal load/URL invalid, langsung tampilkan icon default lokal (bukan icon lucide).
-   - Sekaligus rapikan sumber favicon agar mengurangi 404 eksternal yang mengganggu.
+**Saat ini**: Hak akses per jabatan menyembunyikan/menampilkan menu di sidebar.
+**Yang benar**: Menu selalu terlihat untuk semua karyawan (selama global toggle aktif). Hak akses menentukan apakah karyawan mendapat kemampuan CRUD seperti admin di menu tersebut (tapi tidak bisa kelola akun admin).
 
-6. Kelola Akun: halaman khusus kelengkapan profil karyawan (admin-only)
-   - Tambah route admin-only baru, contoh: `/accounts/:employeeId/profile`.
-   - Di tabel Kelola Akun, kolom “Kelengkapan” dibuat clickable untuk buka halaman ini.
-   - Halaman baru memuat:
-     - data personal lengkap (field yang dipakai di profile completion),
-     - upload dokumen wajib (KTP/KK/FOTO),
-     - simpan update user oleh admin.
-   - Batasi akses: hanya admin yang bisa membuka/menyimpan halaman ini.
+Perubahan:
+- **AppSidebar.tsx**: Hapus filter berdasarkan `positionAccess`. Semua menu yang global-enabled selalu tampil untuk karyawan.
+- **MenuSettingsContext.tsx**: Tambah helper `hasAccess(menuKey)` yang return true jika user admin ATAU user punya positionAccess untuk menu tersebut.
+- **Halaman-halaman terkait** (Notes, Accounts, Attendance, dll): Gunakan `hasAccess` untuk menentukan apakah tampilkan view admin (CRUD semua karyawan) atau view biasa.
+- **Khusus Kelola Akun**: Jika karyawan punya akses, dia bisa lihat dan kelola semua karyawan tapi TIDAK bisa kelola akun admin. Filter admin accounts dari daftar yang bisa dikelola.
+- **Settings > Hak Akses**: Tambahkan menu "Kelola Akun" (`accounts`) ke daftar MENU_ITEMS yang bisa di-toggle per jabatan.
+- **Backend PositionAccess model**: Tambah field `accounts` di menus schema.
 
-7. Settings > Hak Akses: jabatan dinamis + dialog Tambah Jabatan
-   - Tambah dialog “Tambah Jabatan” (nama jabatan, deskripsi).
-   - List jabatan di tab Hak Akses diambil dari data jabatan dinamis (bukan dari user yang sudah ada).
-   - Toggle “Atur menu mana saja” langsung muncul untuk jabatan baru.
-   - Saat buat/edit akun di Kelola Akun:
-     - field Jabatan diubah jadi dropdown dari daftar jabatan dinamis.
-     - tetap ada fallback aman untuk data jabatan lama (legacy) agar tidak rusak.
+### 2. Tampilkan Catatan di Dashboard Karyawan
 
-8. Perbaikan warning DOM nesting
-   - Komponen Badge saat ini memakai elemen block; ubah root menjadi inline (`span`) agar aman dipakai di teks dan menghilangkan warning `validateDOMNesting`.
+- **Dashboard.tsx**: Tambah widget baru "Catatan Saya" di samping kanan (sebelah widget Tenggat Waktu).
+  - Tampilkan catatan harian terbaru (max 3).
+  - Jika ada catatan dari admin, tampilkan sebagai notifikasi card dengan warna berbeda.
+  - Klik catatan admin → navigate ke `/notes`.
+- Fetch `getDailyNotes` dan `getAdminNotes` di Dashboard.
 
-Detail teknis (ringkas):
-- File backend utama:
-  - `backend/src/services/taskService.js` (rule create task by role + leader check)
-  - `backend/src/controllers/taskController.js` (error response sesuai rule)
-  - `backend/src/models/PositionAccess.js` (tambah `description`)
-  - `backend/src/services/settingsService.js`, `backend/src/controllers/settingsController.js`, `backend/src/routes/settingsRoutes.js` (CRUD jabatan dinamis)
-- File frontend utama:
-  - `src/pages/Dashboard.tsx`
-  - `src/components/DashboardSummary.tsx`
-  - `src/pages/Tasks.tsx`
-  - `src/components/CreateTaskDialog.tsx`
-  - `src/pages/MyTeam.tsx`
-  - `src/pages/TeamDetail.tsx`
-  - `src/pages/Vault.tsx`
-  - `src/pages/Accounts.tsx`
-  - `src/pages/Settings.tsx`
-  - `src/lib/api.ts`
-  - `src/components/ui/badge.tsx`
-  - tambah 1 page admin baru untuk edit kelengkapan profil + update route di `src/App.tsx`
+### 3. Redesign Halaman Notes (2 Kolom + Papan Catatan)
 
-Urutan verifikasi (end-to-end):
-1) Login sebagai employee non-leader: tidak ada tombol buat tugas.
-2) Login sebagai leader: tombol buat tugas ada, dialog hanya bisa buat tugas tim.
-3) Login sebagai admin: bisa buat personal/team.
-4) Dashboard employee: task tim muncul di statistik/deadline/rangkuman.
-5) Klik tugas tim di halaman Tim: pindah ke `/tasks` tab Tim otomatis.
-6) Vault link tanpa favicon valid: tampil icon default lokal.
-7) Kelola Akun > klik Kelengkapan: masuk halaman admin editor profil karyawan.
-8) Settings > tambah jabatan baru: langsung muncul di Hak Akses dan dropdown jabatan saat buat akun.
-9) Console bersih dari warning DOM nesting terkait Badge.
+- **Notes.tsx** untuk employee: Ubah layout jadi 2 kolom:
+  - **Kiri**: Form catatan dengan date picker (seperti sekarang).
+  - **Kanan**: "Papan Catatan" — grid/masonry dari card kertas:
+    - Setiap catatan tampil sebagai card dengan rotasi acak (-3deg s/d +3deg).
+    - Catatan dari admin punya warna berbeda (kuning/amber vs putih).
+    - Klik card → buka dialog detail catatan.
+    - Efek visual seperti sticky notes di papan kelas.
+
+### 4. Sinkronkan Statistik dengan Data Tugas Sebenarnya
+
+- **Settings.tsx**: Statistik saat ini menghitung dari `tasks` context yang mungkin masih menyimpan data lama.
+  - Pastikan statistik hanya menghitung tugas yang benar-benar ada (dari API response terkini).
+  - Filter `myTasks` dengan benar: untuk employee, hanya tugas yang assigneeId === user.id.
+
+---
+
+## Detail Teknis
+
+### File yang diubah:
+
+**Backend:**
+- `backend/src/models/PositionAccess.js` — tambah `accounts: { type: Boolean, default: false }` di menus schema
+- `backend/src/models/MenuSetting.js` — tidak perlu ubah (accounts bukan menu global)
+
+**Frontend:**
+- `src/contexts/MenuSettingsContext.tsx` — tambah fungsi `hasAccess(menuKey): boolean`
+- `src/components/AppSidebar.tsx` — hapus filter positionAccess, semua menu global-enabled tampil
+- `src/pages/Dashboard.tsx` — tambah widget catatan + fetch notes data
+- `src/pages/Notes.tsx` — redesign 2 kolom dengan papan catatan sticky notes
+- `src/pages/Settings.tsx` — tambah "Kelola Akun" di MENU_ITEMS + perbaiki statistik
+- `src/pages/Accounts.tsx` — cek `hasAccess("accounts")` untuk izinkan karyawan kelola akun (kecuali admin)
+
+### Alur Hak Akses Baru:
+```text
+Admin toggle "Catatan" ON untuk jabatan "Staff"
+→ Karyawan Staff tetap lihat menu Catatan (seperti biasa)
+→ TAPI sekarang di halaman Catatan, karyawan Staff
+  bisa lihat daftar semua karyawan dan kirim catatan
+  (seperti admin, tapi tidak bisa ke akun admin)
+
+Admin toggle "Kelola Akun" ON untuk jabatan "Manager"  
+→ Karyawan Manager muncul menu "Kelola Akun" di sidebar
+→ Bisa kelola semua karyawan, tapi akun admin di-filter keluar
+```
+
+### Papan Catatan (Visual):
+```text
+┌─────────────────────────────────────────────┐
+│  Form Catatan (Kiri)  │  Papan Catatan (Kanan)   │
+│  ┌─────────────────┐  │  ┌───┐ ┌───┐ ┌───┐     │
+│  │ Tanggal picker  │  │  │ 📝│ │ 📝│ │ 📝│     │
+│  │ Textarea        │  │  │rot│ │rot│ │rot│     │
+│  │ [Simpan]        │  │  │-2°│ │+3°│ │-1°│     │
+│  └─────────────────┘  │  └───┘ └───┘ └───┘     │
+│                        │  ┌───┐ ┌───┐           │
+│                        │  │ 🟡│ │ 📝│  ← admin  │
+│                        │  │adm│ │rot│    note    │
+│                        │  └───┘ └───┘           │
+└─────────────────────────────────────────────┘
+```
+
