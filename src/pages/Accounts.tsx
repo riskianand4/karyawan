@@ -126,7 +126,10 @@ const Accounts = () => {
     return calculateProfileCompletion(user, documents);
   };
 
-  const filteredUsers = users.filter((u) => {
+  // If employee with access, filter out admin accounts
+  const visibleUsers = isAdmin ? users : users.filter((u) => u.role !== "admin");
+
+  const filteredUsers = visibleUsers.filter((u) => {
     const matchesSearch = u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           u.email.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
