@@ -138,7 +138,7 @@ const EmployeeProfileEditor = () => {
   const initials = employee.name.split(" ").map((n) => n[0]).join("").toUpperCase();
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 max-w-4xl">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 max-w-8xl">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" className="gap-1 text-xs" onClick={() => navigate("/accounts")}>
           <ArrowLeft className="w-3.5 h-3.5" /> Kembali
@@ -165,7 +165,7 @@ const EmployeeProfileEditor = () => {
       {/* Personal Data */}
       <div className="ms-card p-4 space-y-4">
         <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-          <UserIcon className="w-3.5 h-3.5 text-primary" /> Data Pribadi
+          <UserIcon className="w-3.5 h-3.5 " /> Data Pribadi
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
@@ -225,7 +225,7 @@ const EmployeeProfileEditor = () => {
       {/* Financial Data */}
       <div className="ms-card p-4 space-y-4">
         <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-          <CreditCard className="w-3.5 h-3.5 text-primary" /> Data Keuangan & Pajak
+          <CreditCard className="w-3.5 h-3.5 " /> Data Keuangan & Pajak
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="space-y-1">

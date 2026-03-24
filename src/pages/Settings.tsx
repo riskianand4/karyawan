@@ -377,7 +377,7 @@ const SettingsPage = () => {
               return (
                 <div key={pos} className="border border-border rounded-lg p-3 space-y-2">
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Briefcase className="w-3.5 h-3.5 text-primary" /> {pos}
+                    <Briefcase className="w-3.5 h-3.5 " /> {pos}
                   </h3>
                   <div className="grid grid-cols-2 gap-2">
                     {MENU_ITEMS.map((item) => (

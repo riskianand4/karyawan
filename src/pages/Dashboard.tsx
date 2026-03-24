@@ -86,7 +86,7 @@ const Dashboard = () => {
         return (
           <div className="ms-card p-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><ListChecks className="w-4 h-4 text-primary" /> Tugas Hari Ini</h2>
+              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><ListChecks className="w-4 h-4 " /> Tugas Hari Ini</h2>
               <span className="text-xs text-muted-foreground">{todayCompleted}/{todayTasks.length}</span>
             </div>
             <div className="space-y-2">
@@ -131,7 +131,7 @@ const Dashboard = () => {
         return (
           <div className="ms-card p-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><CalendarClock className="w-3.5 h-3.5 text-primary" /> Tenggat Waktu</h2>
+              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><CalendarClock className="w-3.5 h-3.5 " /> Tenggat Waktu</h2>
               <Button variant="ghost" size="sm" className="text-[10px] gap-1 h-6 px-2" onClick={() => navigate("/tasks")}>Lihat semua <ArrowRight className="w-2.5 h-2.5" /></Button>
             </div>
             {upcomingTasks.length === 0 ? (

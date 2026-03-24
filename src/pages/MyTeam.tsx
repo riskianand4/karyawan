@@ -205,7 +205,7 @@ const MyTeam = () => {
                         <UserCircle className="w-3.5 h-3.5 text-muted-foreground" />
                         Anggota Tim
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
                         {members.map((member) => {
                           if (!member) return null;
                           const isLeader = team.leaderId === member.id;
@@ -241,7 +241,7 @@ const MyTeam = () => {
                           Tidak ada tugas aktif saat ini untuk tim ini.
                         </p>
                       ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-5 gap-3">
                           {teamTasks.map((task) => {
                             const assignee = allUsers.find((u) => u.id === task.assigneeId);
 
@@ -266,14 +266,8 @@ const MyTeam = () => {
                               >
                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${statusConfig.color}`} />
 
-                                <Avatar className="w-8 h-8 ml-1 shrink-0 shadow-sm">
-                                  <AvatarFallback className="text-[10px] font-semibold bg-muted text-muted-foreground">
-                                    {initials(assignee?.name || "?")}
-                                  </AvatarFallback>
-                                </Avatar>
-
                                 <div className="flex-1 min-w-0 py-0.5">
-                                  <p className="text-sm font-medium text-foreground truncate transition-colors group-hover:text-primary">
+                                  <p className="text-sm font-medium text-foreground truncate transition-colors ">
                                     {task.title}
                                   </p>
                                   <div className="flex items-center gap-2 mt-1 flex-wrap">

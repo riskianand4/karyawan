@@ -80,7 +80,7 @@ const OnboardingGuide = () => {
           </button>
 
           <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-            <Icon className="w-7 h-7 text-primary" />
+            <Icon className="w-7 h-7 " />
           </div>
 
           <h2 className="text-lg font-bold text-foreground">{current.title}</h2>
