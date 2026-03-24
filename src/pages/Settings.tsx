@@ -78,7 +78,10 @@ const SettingsPage = () => {
 
   const initials = name.split(" ").map((n) => n[0]).join("") || "?";
 
-  const myTasks = user ? tasks.filter((t) => t.assigneeId === user.id || user.role === "admin") : [];
+  const myTasks = user ? tasks.filter((t) => {
+    if (user.role === "admin") return true;
+    return t.assigneeId === user.id;
+  }) : [];
   const completedTasks = myTasks.filter((t) => t.status === "completed").length;
   const activeTasks = myTasks.filter((t) => t.status !== "completed").length;
   const completionRate = myTasks.length > 0 ? Math.round((completedTasks / myTasks.length) * 100) : 0;

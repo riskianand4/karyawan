@@ -3,12 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTasks } from "@/contexts/TaskContext";
 import { StatsSkeleton, CardGridSkeleton } from "@/components/PageSkeleton";
 import api from "@/lib/api";
-import type { ActivityItem } from "@/types";
-import { CheckCircle2, Clock, AlertTriangle, Plus, Shield, ArrowRight, TrendingUp, CalendarClock, ListChecks, BarChart3 } from "lucide-react";
+import type { ActivityItem, DailyNote, AdminNote } from "@/types";
+import { CheckCircle2, Clock, AlertTriangle, Plus, Shield, ArrowRight, TrendingUp, CalendarClock, ListChecks, BarChart3, StickyNote, Bell } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import StatsCard from "@/components/StatsCard";
 import ActivityTimeline from "@/components/ActivityTimeline";
 import DashboardSummary from "@/components/DashboardSummary";
@@ -30,6 +31,17 @@ const Dashboard = () => {
   const { tasks, updateTaskStatus, loading: tasksLoading } = useTasks();
   const navigate = useNavigate();
   const employees = users.filter((u) => u.role === "employee");
+
+  // Notes state for employee dashboard
+  const [dailyNotes, setDailyNotes] = useState<DailyNote[]>([]);
+  const [adminNotes, setAdminNotes] = useState<AdminNote[]>([]);
+
+  useEffect(() => {
+    if (!isAdmin && user) {
+      api.getDailyNotes({ userId: user.id }).then(setDailyNotes).catch(() => {});
+      api.getAdminNotes({ toEmployeeId: user.id }).then(setAdminNotes).catch(() => {});
+    }
+  }, [isAdmin, user]);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -79,6 +91,11 @@ const Dashboard = () => {
     { value: completionRate, fill: "hsl(var(--primary))" },
     { value: 100 - completionRate, fill: "hsl(var(--muted))" },
   ];
+
+  // Today's notes for employee
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const todayNotes = dailyNotes.filter((n) => n.date === todayStr).slice(0, 3);
+  const recentAdminNotes = adminNotes.slice(0, 3);
 
   const renderWidget = (id: string) => {
     switch (id) {
@@ -148,6 +165,49 @@ const Dashboard = () => {
             )}
           </div>
         );
+      case "my-notes":
+        return (
+          <div className="ms-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xs font-semibold text-foreground flex items-center gap-1.5"><StickyNote className="w-3.5 h-3.5 text-primary" /> Catatan Saya</h2>
+              <Button variant="ghost" size="sm" className="text-[10px] gap-1 h-6 px-2" onClick={() => navigate("/notes")}>Lihat semua <ArrowRight className="w-2.5 h-2.5" /></Button>
+            </div>
+            {/* Admin notes as notifications */}
+            {recentAdminNotes.length > 0 && (
+              <div className="space-y-1.5 mb-3">
+                {recentAdminNotes.map((note) => (
+                  <div
+                    key={note.id}
+                    className={`flex items-start gap-2 p-2 rounded-md cursor-pointer transition-colors ${note.priority === "important" ? "bg-destructive/5 border border-destructive/20" : "bg-warning/5 border border-warning/20"}`}
+                    onClick={() => navigate("/notes")}
+                  >
+                    <Bell className="w-3 h-3 mt-0.5 text-warning shrink-0" />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="outline" className="text-[8px] px-1 py-0 border-warning text-warning">Admin</Badge>
+                        {note.priority === "important" && <Badge variant="destructive" className="text-[8px] px-1 py-0">!</Badge>}
+                      </div>
+                      <p className="text-[11px] text-foreground line-clamp-2 mt-0.5">{note.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Daily notes */}
+            {todayNotes.length > 0 ? (
+              <div className="space-y-1.5">
+                {todayNotes.map((note) => (
+                  <div key={note.id} className="p-2 rounded-md border border-border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => navigate("/notes")}>
+                    <p className="text-[11px] text-foreground line-clamp-2">{note.content}</p>
+                    <p className="text-[9px] text-muted-foreground mt-1">{format(new Date(note.createdAt), "HH:mm")}</p>
+                  </div>
+                ))}
+              </div>
+            ) : recentAdminNotes.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Belum ada catatan hari ini</p>
+            ) : null}
+          </div>
+        );
       default:
         return null;
     }
@@ -181,6 +241,7 @@ const Dashboard = () => {
             {renderWidget("weekly-chart")}
             {renderWidget("completion-ring")}
             {renderWidget("deadlines")}
+            {!isAdmin && renderWidget("my-notes")}
             {isAdmin && renderWidget("team-dist")}
           </div>
 
