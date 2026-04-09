@@ -1,6 +1,7 @@
 const DailyNote = require("../models/DailyNote");
 const AdminNote = require("../models/AdminNote");
 const BossNote = require("../models/BossNote");
+const User = require("../models/User");
 
 // Daily notes (employee)
 exports.getDailyNotes = async (userId, date) => {
@@ -33,7 +34,14 @@ exports.getAdminNotes = async (query = {}) => {
   return AdminNote.find(filter).sort({ createdAt: -1 });
 };
 
-exports.createAdminNote = async (data) => {
+exports.createAdminNote = async (data, requestUser) => {
+  // Non-admin users cannot send notes to admin accounts
+  if (requestUser && requestUser.role !== "admin" && data.toEmployeeId) {
+    const target = await User.findById(data.toEmployeeId);
+    if (target && target.role === "admin") {
+      throw Object.assign(new Error("Anda tidak bisa mengirim catatan ke admin"), { statusCode: 403 });
+    }
+  }
   return AdminNote.create(data);
 };
 

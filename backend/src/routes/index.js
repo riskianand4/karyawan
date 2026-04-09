@@ -16,5 +16,10 @@ router.use("/teams", require("./teamRoutes"));
 router.use("/contracts", require("./contractRoutes"));
 router.use("/activities", require("./activityRoutes"));
 router.use("/settings", require("./settingsRoutes"));
+router.use("/approvals", require("./approvalRoutes"));
+router.use("/partners", require("./partnerRoutes"));
+router.use("/warnings", require("./warningRoutes"));
+router.use("/announcements", require("./announcementRoutes"));
+router.use("/explorer", require("./explorerRoutes"));
 
 module.exports = router;

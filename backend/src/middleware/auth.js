@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/env");
 const User = require("../models/User");
+const PositionAccess = require("../models/PositionAccess");
 
 const auth = async (req, res, next) => {
   try {
@@ -26,4 +27,26 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-module.exports = { auth, adminOnly };
+const adminOrAccess = (menuKey) => {
+  return async (req, res, next) => {
+    if (req.user.role === "admin") return next();
+    
+    const position = req.user.position || "";
+    if (!position) {
+      return res.status(403).json({ error: "Akses ditolak. Anda tidak memiliki hak akses." });
+    }
+
+    try {
+      const pa = await PositionAccess.findOne({ position });
+      if (pa && pa.menus && pa.menus[menuKey] === true) {
+        return next();
+      }
+    } catch (err) {
+      // fall through to 403
+    }
+
+    return res.status(403).json({ error: "Akses ditolak. Anda tidak memiliki hak akses." });
+  };
+};
+
+module.exports = { auth, adminOnly, adminOrAccess };

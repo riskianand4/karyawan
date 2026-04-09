@@ -29,7 +29,7 @@ const CommandPalette = () => {
     { label: "Tugas", icon: CheckSquare, path: "/tasks" },
     { label: "Kalender", icon: CalendarDays, path: "/calendar" },
     { label: "Pesan Tim", icon: MessageCircleCodeIcon, path: "/messages" },
-    ...(isAdmin ? [{ label: "Direktori Tim", icon: Users, path: "/team" }, { label: "Laporan", icon: BarChart3, path: "/reports" }] : []),
+    ...(isAdmin ? [{ label: "Direktori Tim", icon: Users, path: "/team" }] : []),
     { label: "Tautan", icon: Shield, path: "/vault" },
     { label: "Log Aktivitas", icon: ScrollText, path: "/activity" },
     { label: "Pengaturan", icon: Settings, path: "/settings" },
@@ -63,7 +63,7 @@ const CommandPalette = () => {
         </CommandGroup>
         {matchedTasks.length > 0 && (
           <CommandGroup heading="Tugas">
-            {matchedTasks.map((t) => (<CommandItem key={t.id} onSelect={() => go("/tasks")} className="gap-3 cursor-pointer"><CheckSquare className="w-4 h-4 text-muted-foreground" /><div className="flex flex-col"><span className="text-sm">{t.title}</span><span className="text-[10px] text-muted-foreground capitalize">{t.status === "todo" ? "Akan Dikerjakan" : t.status === "in-progress" ? "Sedang Dikerjakan" : t.status === "needs-review" ? "Perlu Ditinjau" : "Selesai"}</span></div></CommandItem>))}
+            {matchedTasks.map((t) => (<CommandItem key={t.id} onSelect={() => go("/tasks")} className="gap-3 cursor-pointer"><CheckSquare className="w-4 h-4 text-muted-foreground" /><div className="flex flex-col"><span className="text-sm">{t.title}</span><span className="text-[10px] text-muted-foreground capitalize">{t.status === "todo" ? "Tugas" : "Selesai"}</span></div></CommandItem>))}
           </CommandGroup>
         )}
         {matchedUsers.length > 0 && (
@@ -72,7 +72,7 @@ const CommandPalette = () => {
           </CommandGroup>
         )}
         {matchedLinks.length > 0 && (
-          <CommandGroup heading="Tautan Brankas">
+          <CommandGroup heading="Tautan">
             {matchedLinks.map((l) => (<CommandItem key={l.id} onSelect={() => go("/vault")} className="gap-3 cursor-pointer"><LinkIcon className="w-4 h-4 text-muted-foreground" /><div className="flex flex-col"><span className="text-sm">{l.title}</span><span className="text-[10px] text-muted-foreground truncate">{l.url}</span></div></CommandItem>))}
           </CommandGroup>
         )}

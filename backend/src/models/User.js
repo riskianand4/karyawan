@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
   bankName: { type: String, default: "" },
   bankAccountNumber: { type: String, default: "" },
   bankAccountName: { type: String, default: "" },
+  office: { type: String, enum: ["Meulaboh", "Banda Aceh", ""], default: "" },
 }, { timestamps: true });
 
 userSchema.pre("save", async function (next) {

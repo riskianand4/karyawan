@@ -21,7 +21,10 @@ exports.getAdminNotes = async (req, res, next) => {
 };
 
 exports.createAdminNote = async (req, res, next) => {
-  try { res.status(201).json(await noteService.createAdminNote({ ...req.body, fromAdminId: req.userId })); } catch (err) { next(err); }
+  try {
+    const data = { ...req.body, fromAdminId: req.userId };
+    res.status(201).json(await noteService.createAdminNote(data, { id: req.userId, role: req.user.role }));
+  } catch (err) { next(err); }
 };
 
 exports.deleteAdminNote = async (req, res, next) => {

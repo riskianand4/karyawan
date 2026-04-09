@@ -1,16 +1,18 @@
 const mongoose = require("mongoose");
 
-const taskNoteSchema = new mongoose.Schema({
-  text: { type: String, required: true },
-  authorId: { type: String, required: true },
-  createdAt: { type: String, default: () => new Date().toISOString() },
-});
-
 const taskAttachmentSchema = new mongoose.Schema({
   name: String,
   size: Number,
   type: String,
   url: String,
+  uploadedBy: { type: String, default: "" },
+});
+
+const taskNoteSchema = new mongoose.Schema({
+  text: { type: String, default: "" },
+  authorId: { type: String, required: true },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  attachments: [taskAttachmentSchema],
 });
 
 const taskSchema = new mongoose.Schema({
@@ -20,12 +22,12 @@ const taskSchema = new mongoose.Schema({
   teamId: { type: String, default: "" },
   type: { type: String, enum: ["personal", "team"], default: "personal" },
   createdBy: { type: String, default: "" },
-  status: { type: String, enum: ["todo", "in-progress", "needs-review", "completed"], default: "todo" },
-  priority: { type: String, enum: ["high", "medium", "low"], default: "medium" },
+  status: { type: String, enum: ["todo", "completed"], default: "todo" },
+  priority: { type: String, enum: ["high", "medium", "low", "none"], default: "none" },
   deadline: { type: String, required: true },
   createdAt: { type: String, default: () => new Date().toISOString() },
   notes: [taskNoteSchema],
-  attachments: [taskAttachmentSchema],
+  attachments: [taskAttachmentSchema], // kept for backward compat
 }, { timestamps: true });
 
 taskSchema.methods.toJSON = function () {

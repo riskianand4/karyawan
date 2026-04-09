@@ -4,10 +4,8 @@ const payslipSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   month: { type: Number, required: true },
   year: { type: Number, required: true },
-  basicSalary: { type: Number, required: true },
-  allowances: [{ name: String, amount: Number }],
-  deductions: [{ name: String, amount: Number }],
-  netSalary: { type: Number, required: true },
+  pdfUrl: { type: String, required: true },
+  paydayDate: { type: Number, default: 20 },
 }, { timestamps: true });
 
 payslipSchema.methods.toJSON = function () {

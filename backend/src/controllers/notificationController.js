@@ -15,3 +15,11 @@ exports.markRead = async (req, res, next) => {
 exports.getUnreadCount = async (req, res, next) => {
   try { res.json({ count: await notificationService.getUnreadCount(req.userId) }); } catch (err) { next(err); }
 };
+
+exports.deleteNotification = async (req, res, next) => {
+  try { res.json(await notificationService.deleteById(req.params.id, req.userId)); } catch (err) { next(err); }
+};
+
+exports.clearAll = async (req, res, next) => {
+  try { res.json(await notificationService.deleteAll(req.userId)); } catch (err) { next(err); }
+};

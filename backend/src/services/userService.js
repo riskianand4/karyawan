@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const PositionAccess = require("../models/PositionAccess");
 
 exports.getAll = async (query = {}) => {
   const filter = {};
@@ -42,4 +43,27 @@ exports.remove = async (id) => {
   const user = await User.findByIdAndDelete(id);
   if (!user) throw Object.assign(new Error("User tidak ditemukan"), { statusCode: 404 });
   return { message: "User berhasil dihapus" };
+};
+
+exports.getReviewers = async () => {
+  const posAccess = await PositionAccess.find({ "menus.review": true });
+  const positions = posAccess.map((p) => p.position);
+  if (positions.length === 0) return [];
+  return User.find({ position: { $in: positions } }).sort({ name: 1 });
+};
+
+exports.getApprovers = async () => {
+  // Get admins + employees with approve access
+  const admins = await User.find({ role: "admin" }).sort({ name: 1 });
+  const posAccess = await PositionAccess.find({ "menus.approve": true });
+  const positions = posAccess.map((p) => p.position);
+  const employees = positions.length > 0
+    ? await User.find({ role: "employee", position: { $in: positions } }).sort({ name: 1 })
+    : [];
+  const allIds = new Set();
+  const result = [];
+  for (const u of [...admins, ...employees]) {
+    if (!allIds.has(u.id)) { allIds.add(u.id); result.push(u); }
+  }
+  return result;
 };

@@ -6,7 +6,7 @@ export type { TeamMessage };
 
 interface MessageContextType {
   messages: TeamMessage[];
-  sendMessage: (msg: Omit<TeamMessage, "id" | "createdAt">) => void;
+  sendMessage: (msg: Partial<TeamMessage>) => void;
   respondToRequest: (messageId: string, response: "accepted" | "rejected") => void;
   getUnreadCount: (userId: string) => number;
   getPendingRequestCount: (userId: string) => number;
@@ -33,7 +33,7 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [refreshMessages]);
 
-  const sendMessage = useCallback(async (msg: Omit<TeamMessage, "id" | "createdAt">) => {
+  const sendMessage = useCallback(async (msg: Partial<TeamMessage>) => {
     try {
       const newMsg = await api.sendMessage(msg);
       setMessages((prev) => [newMsg, ...prev]);
@@ -53,13 +53,13 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const getUnreadCount = useCallback((userId: string) => {
     return messages.filter(
-      (m) => (m.toUserId === userId || m.toUserId === "all") && m.status !== "read" && m.fromUserId !== userId && m.type !== "collaboration_request"
+      (m) => m.toUserId === userId && !m.isRead && m.fromUserId !== userId
     ).length;
   }, [messages]);
 
   const getPendingRequestCount = useCallback((userId: string) => {
     return messages.filter(
-      (m) => m.toUserId === userId && m.type === "collaboration_request" && m.status === "pending"
+      (m) => m.toUserId === userId && (m.type === "collaboration_request" || m.type === "approval_request") && m.status === "pending"
     ).length;
   }, [messages]);
 

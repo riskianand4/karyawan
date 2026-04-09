@@ -40,15 +40,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
-      <div className="absolute -bottom-[450px] w-[1000px] h-[900px] right-[200px] z-20 pointer-events-none opacity-30 md:opacity-50 lg:opacity-100">
-        <img
-          src={mesjid}
-          className="object-cover"
-          alt="mesjid"
-        />
-      </div>
-      {/* SVG noise filter definition */}
-      {/* SVG noise filter definition */}
       <svg
         style={{
           position: "absolute",

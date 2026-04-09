@@ -22,3 +22,16 @@ exports.markRead = async (id) => {
 exports.getUnreadCount = async (userId) => {
   return Notification.countDocuments({ userId, read: false });
 };
+
+exports.deleteById = async (id, userId) => {
+  const notif = await Notification.findById(id);
+  if (!notif) throw Object.assign(new Error("Notifikasi tidak ditemukan"), { statusCode: 404 });
+  if (notif.userId !== userId) throw Object.assign(new Error("Tidak memiliki akses"), { statusCode: 403 });
+  await Notification.findByIdAndDelete(id);
+  return { message: "Notifikasi berhasil dihapus" };
+};
+
+exports.deleteAll = async (userId) => {
+  await Notification.deleteMany({ userId });
+  return { message: "Semua notifikasi berhasil dihapus" };
+};

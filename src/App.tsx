@@ -10,6 +10,7 @@ import { VaultProvider } from "@/contexts/VaultContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MessageProvider } from "@/contexts/MessageContext";
 import { MenuSettingsProvider } from "@/contexts/MenuSettingsContext";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Login from "./pages/Login";
 import AppLayout from "./components/AppLayout";
@@ -23,7 +24,6 @@ const MyTeam = lazy(() => import("./pages/MyTeam"));
 const TeamDetail = lazy(() => import("./pages/TeamDetail"));
 const Vault = lazy(() => import("./pages/Vault"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Reports = lazy(() => import("./pages/Reports"));
 const ActivityLog = lazy(() => import("./pages/ActivityLog"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Attendance = lazy(() => import("./pages/Attendance"));
@@ -32,8 +32,12 @@ const Finance = lazy(() => import("./pages/Finance"));
 const Payslip = lazy(() => import("./pages/Payslip"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Accounts = lazy(() => import("./pages/Accounts"));
-const EmployeeProfileEditor = lazy(() => import("./pages/EmployeeProfileEditor"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Approval = lazy(() => import("./pages/Approval"));
+const Partner = lazy(() => import("./pages/Partner"));
+const Announcements = lazy(() => import("./pages/Announcements"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Explorer = lazy(() => import("./pages/Explorer"));
 
 const queryClient = new QueryClient();
 
@@ -117,13 +121,17 @@ const AppRoutes = () => {
         <Route path="/messages/:employeeId" element={<SP><Messages /></SP>} />
 
         <Route path="/profile" element={<SP><Profile /></SP>} />
+        <Route path="/profile/:userId" element={<SP><Profile /></SP>} />
         <Route path="/team" element={<SP><TeamPage /></SP>} />
         <Route path="/team/:teamId" element={<AdminRoute><SP><TeamDetail /></SP></AdminRoute>} />
         <Route path="/settings" element={<SP><Settings /></SP>} />
-        <Route path="/reports" element={<AdminRoute><SP><Reports /></SP></AdminRoute>} />
         <Route path="/accounts" element={<AdminRoute><SP><Accounts /></SP></AdminRoute>} />
-        <Route path="/accounts/:employeeId/profile" element={<AdminRoute><SP><EmployeeProfileEditor /></SP></AdminRoute>} />
         <Route path="/activity" element={<SP><ActivityLog /></SP>} />
+        <Route path="/approval" element={<SP><Approval /></SP>} />
+        <Route path="/partner" element={<SP><Partner /></SP>} />
+        <Route path="/pengumuman" element={<SP><Announcements /></SP>} />
+        <Route path="/notifications" element={<SP><Notifications /></SP>} />
+        <Route path="/explorer" element={<SP><Explorer /></SP>} />
       </Route>
       <Route path="*" element={<SP><NotFound /></SP>} />
     </Routes>
@@ -142,9 +150,11 @@ const App = () => (
               <TaskProvider>
                 <VaultProvider>
                   <MessageProvider>
-                    <BrowserRouter>
-                      <AppRoutes />
-                    </BrowserRouter>
+                    <SidebarProvider>
+                      <BrowserRouter>
+                        <AppRoutes />
+                      </BrowserRouter>
+                    </SidebarProvider>
                   </MessageProvider>
                 </VaultProvider>
               </TaskProvider>

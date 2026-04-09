@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckSquare, MessageCircleCodeIcon, Shield, ArrowRight, X, Sparkles } from "lucide-react";
+import { CheckSquare, MessageCircleCodeIcon, Shield, ArrowRight, X, Sparkles, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -21,8 +21,8 @@ const STEPS = [
     description: "Terima pesan dari atasan dan ajukan kolaborasi ke rekan kerja. Semua komunikasi di satu tempat.",
   },
   {
-    icon: Shield,
-    title: "Brankas Aman",
+    icon: Link2,
+    title: "Tautan Aman",
     description: "Simpan kredensial dan akses tautan perusahaan dengan aman. Data Anda terlindungi.",
   },
 ];

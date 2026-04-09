@@ -36,7 +36,7 @@ const AdminDashboardSummary = () => {
 
   const employeeSummaries = employees.map((emp) => {
     const empTasks = tasks.filter((t) => t.assigneeId === emp.id);
-    const pendingTasks = empTasks.filter((t) => t.status === "todo" || t.status === "in-progress").length;
+    const pendingTasks = empTasks.filter((t) => t.status === "todo").length;
     const completedTasks = empTasks.filter((t) => t.status === "completed").length;
     const totalTasks = empTasks.length;
     const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -86,11 +86,9 @@ const AdminDashboardSummary = () => {
         })}
       </div>
 
-      {/* 2-column grid: Employees left, Teams right */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Per Karyawan */}
         <div className="space-y-2">
-          <h3 className="text-[11px] font-medium text-muted-foreground">Per Karyawan</h3>
+          <h3 className="text-[11px] font-medium text-muted-foreground">Karyawan</h3>
           {visibleEmployees.map((emp) => {
             const initials = emp.name.split(" ").map((n) => n[0]).join("").slice(0, 2);
             return (
@@ -99,7 +97,7 @@ const AdminDashboardSummary = () => {
                   <div className="flex items-center gap-2">
                     <Avatar className="w-7 h-7">
                       {emp.avatar && <AvatarImage src={getUploadUrl(emp.avatar)} alt={emp.name} />}
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">{initials}</AvatarFallback>
+                      <AvatarFallback className="bg-primary/10  text-xs font-semibold">{initials}</AvatarFallback>
                     </Avatar>
                     <div><p className="text-xs font-medium text-foreground">{emp.name}</p><p className="text-[10px] text-muted-foreground">{emp.position}</p></div>
                   </div>
@@ -123,9 +121,9 @@ const AdminDashboardSummary = () => {
 
         {/* Per Tim */}
         <div className="space-y-2">
-          <h3 className="text-[11px] font-medium text-muted-foreground">Per Tim</h3>
+          <h3 className="text-[11px] font-medium text-muted-foreground">Team</h3>
           {visibleTeams.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">Belum ada tim</p>
+            <p className="text-xs text-muted-foreground text-center py-4">Belum ada team</p>
           ) : visibleTeams.map((team) => (
             <div key={team.id} className="p-3 rounded-lg border border-border space-y-2 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate(`/team`)}>
               <div className="flex items-center justify-between">
